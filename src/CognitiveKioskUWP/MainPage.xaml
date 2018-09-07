@@ -1,0 +1,88 @@
+﻿<Page
+    x:Class="MTCSTLKiosk.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:MTCSTLKiosk"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height=".5*"/>
+            <RowDefinition Height=".5*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width=".5*"/>
+            <ColumnDefinition Width=".5*"/>
+        </Grid.ColumnDefinitions>
+        <Grid  Background="#f25022" Grid.Row="0" Grid.Column="0" BorderBrush="Black">
+            <Grid.Resources>
+                <Storyboard x:Name="InfoFadeOut">
+                    <DoubleAnimation Storyboard.TargetName="borderInfo" Storyboard.TargetProperty="Opacity"
+                            From="1.0" To="0.0" Duration="0:0:5" />
+                </Storyboard>
+            </Grid.Resources>
+            <TextBlock HorizontalAlignment="Center" Text="COME" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Bold" FontSize="150" Foreground="White" />
+            <Grid x:Name="gridCaptureTopLeft" Tapped="Settings_Tapped" Background="Transparent">
+                <CaptureElement x:Name="captureTopLeft" Margin="20" Stretch="UniformToFill" IsHitTestVisible="False"></CaptureElement>
+                <Border VerticalAlignment="Bottom" Background="#66FFB900" Margin="20">
+                    <TextBlock x:Name="textDescription" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="30" TextAlignment="Center" Foreground="White"/>
+                </Border>
+            </Grid>
+            <Border x:Name="borderInfo" Background="White" Margin="10,10,10,0" Height="200" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="5,5,5,5">
+                <Grid Tapped="Settings_Tapped" IsHitTestVisible="True" Background="White">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Important-ish Info!" Margin="5" FontSize="48" FontWeight="Bold" TextAlignment="Center" IsHitTestVisible="False"></TextBlock>
+                        <TextBlock x:Name="textUserInfo" Text="Click here or on screen after start to get to settings" Margin="10" FontSize="32" TextWrapping="WrapWholeWords" IsHitTestVisible="False"></TextBlock>
+                    </StackPanel>
+                    
+                </Grid>
+            </Border>
+        </Grid>
+        <Grid Background="#7fba00" Grid.Row="0" Grid.Column="1">
+            <TextBlock HorizontalAlignment="Center" Text="SAY" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Bold" FontSize="150" Foreground="White" />
+            <Grid x:Name="gridCaptureTopRight" Tapped="Settings_Tapped" Background="Transparent">
+                <CaptureElement x:Name="captureTopRight" Margin="20" Stretch="UniformToFill" IsHitTestVisible="False"></CaptureElement>
+                <Border x:Name="borderTranslation" VerticalAlignment="Bottom" Background="#6600A4EF" Margin="20">
+                    <StackPanel>
+                    <TextBlock x:Name="textTranslationOriginal" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="30" TextAlignment="Left" Foreground="White" MaxLines="1" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock x:Name="textTranslation" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="30" TextAlignment="Left" Foreground="White" MaxLines="1" TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+        <Grid Background="#00a4ef" Grid.Row="1" Grid.Column="0">
+            <TextBlock HorizontalAlignment="Center" Text="HI" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Bold" FontSize="150" Foreground="White" />
+            <Grid x:Name="gridCaptureBottomLeft" Tapped="Settings_Tapped" Background="Transparent">
+                <CaptureElement x:Name="captureBottomLeft" Margin="20" Stretch="UniformToFill" IsHitTestVisible="False"></CaptureElement>
+                <Border VerticalAlignment="Bottom" Background="#7F7FBA00" Margin="20">
+                    <TextBlock x:Name="textTags" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="30" TextAlignment="Center" Foreground="White"/>
+                </Border>
+            </Grid>
+        </Grid>
+        <Grid Background="#ffb900" Grid.Row="1" Grid.Column="1">
+            <TextBlock HorizontalAlignment="Center" Text="&#xEB68;" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Bold" FontSize="150" Foreground="White" FontFamily="Segoe MDL2 Assets" />
+            <Grid x:Name="gridCaptureBottomRight" Tapped="Settings_Tapped" Background="Transparent">
+                <CaptureElement x:Name="captureBottomRight" Margin="20" Stretch="UniformToFill" IsHitTestVisible="False"></CaptureElement>
+                <Border VerticalAlignment="Bottom" Background="#82F25022" Margin="20">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width=".5*"/>
+                            <ColumnDefinition Width=".5*"/>
+                            <ColumnDefinition Width=".5*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="textFaces1" Grid.Column="0" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="15" TextAlignment="Left" Foreground="White" FocusVisualMargin="2,0,0,0" Margin="5,0,0,0"/>
+                        <TextBlock x:Name="textFaces2" Grid.Column="1" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="15" TextAlignment="Left" Foreground="White"/>
+                        <TextBlock x:Name="textFaces3" Grid.Column="2" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="15" TextAlignment="Left" Foreground="White"/>
+                    </Grid>
+                </Border>
+                <local:AgeControl x:Name="ageControl1" HorizontalAlignment="Left" Margin="119,114,0,0" VerticalAlignment="Top" VerticalContentAlignment="Top" Visibility="Collapsed"  />
+                <local:AgeControl x:Name="ageControl2" HorizontalAlignment="Left" Margin="119,114,0,0" VerticalAlignment="Top" VerticalContentAlignment="Top" Visibility="Collapsed" />
+                <local:AgeControl x:Name="ageControl3" HorizontalAlignment="Left" Margin="119,114,0,0" VerticalAlignment="Top" VerticalContentAlignment="Top" Visibility="Collapsed" />
+            </Grid>
+        </Grid>
+
+    </Grid>
+</Page>
