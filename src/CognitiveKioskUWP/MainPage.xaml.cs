@@ -62,17 +62,8 @@ namespace MTCSTLKiosk
 
         private async void TimerTakePicture_Tick(object sender, object e)
         {
-            try
-            {
-                var image = await TakeImage();
-                await ProcessImage(image);
-
-            }
-            catch (Exception)
-            {
-                // Eat Error
-            }
-
+            var image = await TakeImage();
+            await ProcessImage(image);
         }
 
         private void TimerFace_Tick(object sender, object e)

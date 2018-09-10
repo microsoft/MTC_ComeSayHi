@@ -31,10 +31,19 @@ namespace MTCSTLKiosk
         /// </summary>
         public App()
         {
-            AppCenter.Start("0e22f2c3-bd36-4b7b-9904-f3a32811d822", typeof(Analytics));
             ApplicationView.PreferredLaunchWindowingMode = ApplicationViewWindowingMode.FullScreen;
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+            this.UnhandledException += App_UnhandledException; ;
+            AppCenter.Start("0e22f2c3-bd36-4b7b-9904-f3a32811d822", typeof(Analytics), typeof(Microsoft.AppCenter.Crashes.Crashes));
+        }
+
+        private void App_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
+        {
+
+            Analytics.TrackEvent(Microsoft.AppCenter.Crashes.Crashes.LogTag, new Dictionary<string, string> {
+                { "Extended", e.Exception.ToString() }
+            });
         }
 
         /// <summary>
@@ -100,10 +109,5 @@ namespace MTCSTLKiosk
             deferral.Complete();
         }
 
-        private async void OnUnhandledException(object sender, System.UnhandledExceptionEventArgs args)
-        {
-            // error
-            string e = args.ToString();
-        }
     }
 }
