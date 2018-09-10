@@ -1,4 +1,6 @@
-﻿using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
+﻿using Microsoft.AppCenter;
+using Microsoft.AppCenter.Analytics;
+using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 using Microsoft.CognitiveServices.Speech;
@@ -62,8 +64,19 @@ namespace MTCSTLKiosk
 
         private async void TimerTakePicture_Tick(object sender, object e)
         {
-            var image = await TakeImage();
-            await ProcessImage(image);
+            try
+            {
+                var image = await TakeImage();
+                await ProcessImage(image);
+
+            }
+            catch (Exception ex)
+            {
+                // Eat this error
+                Analytics.TrackEvent(Microsoft.AppCenter.Crashes.Crashes.LogTag, new Dictionary<string, string> {
+                { "Extended", ex.ToString() }
+            });
+            }
         }
 
         private void TimerFace_Tick(object sender, object e)
@@ -184,6 +197,7 @@ namespace MTCSTLKiosk
                 {
                     if (!isFaceFound)
                     {
+                        Analytics.TrackEvent("Faces found, starting capture");
                         isFaceFound = true;
                         await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
                         {

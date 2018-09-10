@@ -34,8 +34,7 @@ namespace MTCSTLKiosk
             ApplicationView.PreferredLaunchWindowingMode = ApplicationViewWindowingMode.FullScreen;
             this.InitializeComponent();
             this.Suspending += OnSuspending;
-            this.UnhandledException += App_UnhandledException; ;
-            AppCenter.Start("0e22f2c3-bd36-4b7b-9904-f3a32811d822", typeof(Analytics), typeof(Microsoft.AppCenter.Crashes.Crashes));
+            this.UnhandledException += App_UnhandledException; 
         }
 
         private void App_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
@@ -53,6 +52,9 @@ namespace MTCSTLKiosk
         /// <param name = "e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
+            AppCenter.Start("0e22f2c3-bd36-4b7b-9904-f3a32811d822", typeof(Analytics), typeof(Microsoft.AppCenter.Crashes.Crashes));
+            Analytics.TrackEvent("Application entry point");
+
             Frame rootFrame = Window.Current.Content as Frame;
             // Do not repeat app initialization when the Window already has content,
             // just ensure that the window is active
