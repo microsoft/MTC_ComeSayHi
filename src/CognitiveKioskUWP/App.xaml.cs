@@ -40,7 +40,7 @@ namespace MTCSTLKiosk
         private void App_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
         {
 
-            Analytics.TrackEvent(Microsoft.AppCenter.Crashes.Crashes.LogTag, new Dictionary<string, string> {
+            Analytics.TrackEvent(Microsoft.AppCenter.Crashes.Crashes.LogTag + "System", new Dictionary<string, string> {
                 { "Extended", e.Exception.ToString() }
             });
         }

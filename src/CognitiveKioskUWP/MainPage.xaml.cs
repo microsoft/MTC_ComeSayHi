@@ -67,7 +67,8 @@ namespace MTCSTLKiosk
             try
             {
                 var image = await TakeImage();
-                await ProcessImage(image);
+                if (image != null)
+                    await ProcessImage(image);
 
             }
             catch (Exception ex)
@@ -244,8 +245,8 @@ namespace MTCSTLKiosk
             gridCaptureBottomRight.Visibility = Visibility.Collapsed;
             gridCaptureTopLeft.Visibility = Visibility.Collapsed;
             gridCaptureTopRight.Visibility = Visibility.Collapsed;
-            if(timerTakePicture != null)
-             timerTakePicture.Stop();
+            if (timerTakePicture != null)
+                timerTakePicture.Stop();
 
             StopSpeechTranslation();
         }
@@ -356,13 +357,13 @@ namespace MTCSTLKiosk
             {
                 // Exception caught let it go!
             }
-           
+
 
         }
 
         private void StopSpeechTranslation()
         {
-            if(translationStopRecognition != null)
+            if (translationStopRecognition != null)
                 translationStopRecognition.TrySetResult(0);
 
         }
@@ -390,85 +391,103 @@ namespace MTCSTLKiosk
 
         private async Task<SoftwareBitmap> TakeImage()
         {
-            SoftwareBitmap savedImage;
-            // Get information about the preview
-            var previewProperties = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview) as VideoEncodingProperties;
+            try
+            {
+                SoftwareBitmap savedImage;
+                // Get information about the preview
+                var previewProperties = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview) as VideoEncodingProperties;
 
-            // Create a video frame in the desired format for the preview frame
-            VideoFrame videoFrame = new VideoFrame(BitmapPixelFormat.Bgra8, (int)previewProperties.Width, (int)previewProperties.Height);
+                // Create a video frame in the desired format for the preview frame
+                VideoFrame videoFrame = new VideoFrame(BitmapPixelFormat.Bgra8, (int)previewProperties.Width, (int)previewProperties.Height);
 
-            VideoFrame previewFrame = await mediaCapture.GetPreviewFrameAsync(videoFrame);
+                VideoFrame previewFrame = await mediaCapture.GetPreviewFrameAsync(videoFrame);
 
-            savedImage = previewFrame.SoftwareBitmap;
+                savedImage = previewFrame.SoftwareBitmap;
 
-            previewFrame.Dispose();
-            previewFrame = null;
+                previewFrame.Dispose();
+                previewFrame = null;
 
-            return savedImage;
+                return savedImage;
+
+            }
+            catch (Exception)
+            {
+                // eat error
+            }
+            return null;
         }
 
         private async Task ProcessImage(SoftwareBitmap image)
         {
-            if (isProcessingImage)
-                return;
-            isProcessingImage = true;
-            Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ComputerVisionClient visionClient = new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ComputerVisionClient(
-                new ApiKeyServiceClientCredentials(settings.VisionKey),
-                new System.Net.Http.DelegatingHandler[] { });
+            try
+            {
 
-            Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient faceClient = new Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient(
-                new ApiKeyServiceClientCredentials(settings.FaceKey),
-                new System.Net.Http.DelegatingHandler[] { });
+                if (isProcessingImage)
+                    return;
+                isProcessingImage = true;
+                Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ComputerVisionClient visionClient = new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ComputerVisionClient(
+                    new ApiKeyServiceClientCredentials(settings.VisionKey),
+                    new System.Net.Http.DelegatingHandler[] { });
 
-            visionClient.Endpoint = $"https://{settings.VisionRegion}.api.cognitive.microsoft.com";
-            faceClient.Endpoint = $"https://{settings.FaceRegion}.api.cognitive.microsoft.com";
+                Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient faceClient = new Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient(
+                    new ApiKeyServiceClientCredentials(settings.FaceKey),
+                    new System.Net.Http.DelegatingHandler[] { });
 
-            List<VisualFeatureTypes> features =
-                    new List<VisualFeatureTypes>()
-                {
+                visionClient.Endpoint = $"https://{settings.VisionRegion}.api.cognitive.microsoft.com";
+                faceClient.Endpoint = $"https://{settings.FaceRegion}.api.cognitive.microsoft.com";
+
+                List<VisualFeatureTypes> features =
+                        new List<VisualFeatureTypes>()
+                    {
                     VisualFeatureTypes.Categories, VisualFeatureTypes.Description,
                     VisualFeatureTypes.Tags, VisualFeatureTypes.Faces
-                };
-            // The list of Face attributes to return.
-            IList<FaceAttributeType> faceAttributes =
-                new FaceAttributeType[]
-                {
+                    };
+                // The list of Face attributes to return.
+                IList<FaceAttributeType> faceAttributes =
+                    new FaceAttributeType[]
+                    {
             FaceAttributeType.Gender, FaceAttributeType.Age,
             FaceAttributeType.Smile, FaceAttributeType.Emotion,
             FaceAttributeType.Glasses, FaceAttributeType.Hair
-                };
+                    };
 
-            try
-            {
-                if (DateTime.Now.Subtract(imageAnalysisLastDate).TotalSeconds > 1)
+                try
                 {
+                    if (DateTime.Now.Subtract(imageAnalysisLastDate).TotalSeconds > 1)
+                    {
+                        using (var ms = new InMemoryRandomAccessStream())
+                        {
+                            BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, ms);
+                            encoder.SetSoftwareBitmap(image);
+                            await encoder.FlushAsync();
+
+                            var analysis = await visionClient.AnalyzeImageInStreamAsync(ms.AsStream(), features);
+                            UpdateWithAnalysis(analysis);
+                        }
+                        imageAnalysisLastDate = DateTime.Now;
+                    }
+
+
                     using (var ms = new InMemoryRandomAccessStream())
                     {
                         BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, ms);
                         encoder.SetSoftwareBitmap(image);
                         await encoder.FlushAsync();
 
-                        var analysis = await visionClient.AnalyzeImageInStreamAsync(ms.AsStream(), features);
-                        UpdateWithAnalysis(analysis);
+                        var analysisFace = await faceClient.Face.DetectWithStreamWithHttpMessagesAsync(ms.AsStream(), returnFaceAttributes: faceAttributes);
+                        UpdateFaces(analysisFace, image.PixelHeight, image.PixelWidth);
                     }
-                    imageAnalysisLastDate = DateTime.Now;
+
                 }
-
-
-                using (var ms = new InMemoryRandomAccessStream())
+                catch (Exception)
                 {
-                    BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, ms);
-                    encoder.SetSoftwareBitmap(image);
-                    await encoder.FlushAsync();
-
-                    var analysisFace = await faceClient.Face.DetectWithStreamWithHttpMessagesAsync(ms.AsStream(), returnFaceAttributes: faceAttributes);
-                    UpdateFaces(analysisFace, image.PixelHeight, image.PixelWidth);
+                    // Eat exception
                 }
 
             }
             catch (Exception)
             {
-                // Eat exception
+                // eat this exception too
             }
             isProcessingImage = false;
         }
