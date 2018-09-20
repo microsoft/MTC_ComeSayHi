@@ -279,11 +279,17 @@ namespace MTCSTLKiosk
                     // Subscribes to events.
                     recognizer.IntermediateResultReceived += (s, e) =>
                     {
-                        Debug.WriteLine($"Message received {e.Result.Text}");
-                        //UpdateText(e.Result.Text);
-                        //NotifyUser($"{e.Result.Text}.");
-                        string languageLong = textLanguges[e.Result.Translations.First().Key];
-                        UpdateTranslationUI($"English: {e.Result.Text}", $"{languageLong}: {e.Result.Translations.First().Value}");
+                        try
+                        {
+                            Debug.WriteLine($"Message received {e.Result.Text}");
+                            string languageLong = textLanguges[e.Result.Translations.First().Key];
+                            UpdateTranslationUI($"English: {e.Result.Text}", $"{languageLong}: {e.Result.Translations.First().Value}");
+
+                        }
+                        catch (Exception)
+                        {
+                            // let it go
+                        }
                     };
 
                     recognizer.FinalResultReceived += (s, e) =>
