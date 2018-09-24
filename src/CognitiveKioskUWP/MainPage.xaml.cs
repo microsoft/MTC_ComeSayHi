@@ -512,7 +512,7 @@ namespace MTCSTLKiosk
             catch (Exception)
             {
 
-                throw;
+                // Eat this exception
             }
         }
 
