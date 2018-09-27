@@ -4,6 +4,7 @@ using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Translation;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -165,7 +166,7 @@ namespace MTCSTLKiosk
                 // Register for face detection events
                 _faceDetectionEffect.FaceDetected += _faceDetectionEffect_FaceDetectedAsync; ;
             }
-            catch (UnauthorizedAccessException)
+            catch (Exception)
             {
                 // This will be thrown if the user denied access to the camera in privacy settings
                 Console.Write("The app was denided access to the camera");
@@ -266,24 +267,25 @@ namespace MTCSTLKiosk
                 isTranslationListening = true;
                 // Creates an instance of a speech factory with specified subscription key and service region.
                 // Replace with your own subscription key and service region (e.g., "westus").
-                var factory = SpeechFactory.FromSubscription(settings.SpeechKey, settings.SpeechRegion);
+                var config = SpeechConfig.FromSubscription(settings.SpeechKey, settings.SpeechRegion);
 
                 translationStopRecognition = new TaskCompletionSource<int>();
 
-                List<string> supLanguages = new List<string>();
                 Random rand = new Random();
                 string language = textLanguges.ElementAt(rand.Next(textLanguges.Keys.Count())).Key;
-                supLanguages.Add(language);
-                using (var recognizer = factory.CreateTranslationRecognizer("en-US", supLanguages))
+                
+                //config.AddTargetLanguage(language);
+                using (var recognizer = new SpeechRecognizer(config))
                 {
                     // Subscribes to events.
-                    recognizer.IntermediateResultReceived += (s, e) =>
+                    recognizer.Recognizing += (s, e) =>
                     {
                         try
                         {
                             Debug.WriteLine($"Message received {e.Result.Text}");
-                            string languageLong = textLanguges[e.Result.Translations.First().Key];
-                            UpdateTranslationUI($"English: {e.Result.Text}", $"{languageLong}: {e.Result.Translations.First().Value}");
+                            //string languageLong = textLanguges[e.Result.Translations.First().Key];
+                            //UpdateTranslationUI($"English: {e.Result.Text}", $"{languageLong}: {e.Result.Translations.First().Value}");
+                            UpdateTranslationUI($"English: {e.Result.Text}", "");
 
                         }
                         catch (Exception)
@@ -292,53 +294,26 @@ namespace MTCSTLKiosk
                         }
                     };
 
-                    recognizer.FinalResultReceived += (s, e) =>
+                    recognizer.Recognized += (s, e) =>
                     {
                         var result = e.Result;
-                        //NotifyUser($"Recognition status: {result.RecognitionStatus.ToString()}");
-                        switch (result.RecognitionStatus)
-                        {
-                            case RecognitionStatus.Recognized:
-
-                                //UpdateText(e.Result.Text);
-                                //NotifyUser($"We Heard: {result.Text}");
-                                break;
-                            case RecognitionStatus.InitialSilenceTimeout:
-                                isTranslationListening = false;
-                                //NotifyUser("The start of the audio stream contains only silence, and the service timed out waiting for speech.\n");
-                                break;
-                            case RecognitionStatus.InitialBabbleTimeout:
-                                isTranslationListening = false;
-                                //isTranslationListening("The start of the audio stream contains only noise, and the service timed out waiting for speech.\n");
-                                break;
-                            case RecognitionStatus.NoMatch:
-                                isTranslationListening = false;
-                                //NotifyUser("The speech was detected in the audio stream, but no words from the target language were matched. Possible reasons could be wrong setting of the target language or wrong format of audio stream.\n");
-                                break;
-                            case RecognitionStatus.Canceled:
-                                isTranslationListening = false;
-                                //NotifyUser($"There was an error, reason: {result.RecognitionFailureReason}");
-                                break;
-                        }
                     };
 
-                    recognizer.RecognitionErrorRaised += (s, e) =>
+                    recognizer.Canceled += (s, e) =>
                     {
                         //NotifyUser($"An error occurred. Please step in front of camera to reactivate.");
                         isTranslationListening = false;
                         translationStopRecognition.TrySetResult(0);
                     };
 
-                    recognizer.OnSessionEvent += (s, e) =>
+                    recognizer.SessionStopped += (s, e) =>
                     {
                         //NotifyUser($"\n    Session event. Event: {e.EventType.ToString()}.");
                         // Stops recognition when session stop is detected.
-                        if (e.EventType == SessionEventType.SessionStoppedEvent)
-                        {
-                            //NotifyUser($"\nStop recognition.");
-                            isTranslationListening = false;
-                            translationStopRecognition.TrySetResult(0);
-                        }
+
+                        //NotifyUser($"\nStop recognition.");
+                        isTranslationListening = false;
+                        translationStopRecognition.TrySetResult(0);
                     };
 
                     // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
@@ -623,7 +598,8 @@ namespace MTCSTLKiosk
                             hair = "bald";
                         else
                         {
-                            hair = face.FaceAttributes.Hair.HairColor.First().Color.ToString();
+                            if(face.FaceAttributes.Hair.HairColor.Count > 0)
+                             hair = face.FaceAttributes.Hair.HairColor.First().Color.ToString();
                         }
                         string userInfo = $"{i + 1}: {face.FaceAttributes.Gender.ToString()} ({face.FaceAttributes.Age.ToString()})\nEmotion: {choosenEmotion} \nGlasses: {face.FaceAttributes.Glasses.ToString()} \nSmile: {face.FaceAttributes.Smile.ToString()} \nHair: {hair} ";
 
