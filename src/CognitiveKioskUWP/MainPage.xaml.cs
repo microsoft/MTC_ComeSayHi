@@ -58,18 +58,37 @@ namespace MTCSTLKiosk
             timerTakePicture = new DispatcherTimer();
             timerTakePicture.Tick += TimerTakePicture_Tick;
             timerTakePicture.Interval = new TimeSpan(0, 0, 0, 0, 100);
+            timerFailsafe = new DispatcherTimer();
+            timerFailsafe.Tick += TimerFailsafe_Tick;
+            timerFailsafe.Interval = new TimeSpan(0, 0, 1, 0, 0);
+            timerFailsafe.Start();
 
             await StartPreviewAsync();
             InfoFadeOut.Begin();
+        }
+
+        private async void TimerFailsafe_Tick(object sender, object e)
+        {
+            // Check for shutoff time
+            if (DateTime.Now.Subtract(faceLastDate).TotalMinutes > 5)
+            {
+                DisableUI();
+                await StartPreviewAsync();
+                
+            }
         }
 
         private async void TimerTakePicture_Tick(object sender, object e)
         {
             try
             {
+                if (isProcessingImage)
+                    return;
+                isProcessingImage = true;
                 var image = await TakeImage();
                 if (image != null)
                     await ProcessImage(image);
+
 
             }
             catch (Exception ex)
@@ -79,6 +98,12 @@ namespace MTCSTLKiosk
                 { "Extended", ex.ToString() }
             });
             }
+            finally
+            {
+                isProcessingImage = false;
+
+            }
+
         }
 
         private void TimerFace_Tick(object sender, object e)
@@ -110,6 +135,7 @@ namespace MTCSTLKiosk
         FaceDetectionEffect _faceDetectionEffect;
         DispatcherTimer timerFace;
         DispatcherTimer timerTakePicture;
+        DispatcherTimer timerFailsafe;
         DateTime faceLastDate = DateTime.Now;
         DateTime imageAnalysisLastDate = DateTime.Now;
         bool isFaceFound = false;
@@ -248,7 +274,7 @@ namespace MTCSTLKiosk
             gridCaptureTopRight.Visibility = Visibility.Collapsed;
             if (timerTakePicture != null)
                 timerTakePicture.Stop();
-
+            isFaceFound = false;
             StopSpeechTranslation();
         }
 
@@ -267,15 +293,16 @@ namespace MTCSTLKiosk
                 isTranslationListening = true;
                 // Creates an instance of a speech factory with specified subscription key and service region.
                 // Replace with your own subscription key and service region (e.g., "westus").
-                var config = SpeechConfig.FromSubscription(settings.SpeechKey, settings.SpeechRegion);
+                var config = SpeechTranslationConfig.FromSubscription(settings.SpeechKey, settings.SpeechRegion);
+                config.SpeechRecognitionLanguage = "en-US";
 
                 translationStopRecognition = new TaskCompletionSource<int>();
 
                 Random rand = new Random();
                 string language = textLanguges.ElementAt(rand.Next(textLanguges.Keys.Count())).Key;
                 
-                //config.AddTargetLanguage(language);
-                using (var recognizer = new SpeechRecognizer(config))
+                config.AddTargetLanguage(language);
+                using (var recognizer = new TranslationRecognizer(config))
                 {
                     // Subscribes to events.
                     recognizer.Recognizing += (s, e) =>
@@ -283,9 +310,8 @@ namespace MTCSTLKiosk
                         try
                         {
                             Debug.WriteLine($"Message received {e.Result.Text}");
-                            //string languageLong = textLanguges[e.Result.Translations.First().Key];
-                            //UpdateTranslationUI($"English: {e.Result.Text}", $"{languageLong}: {e.Result.Translations.First().Value}");
-                            UpdateTranslationUI($"English: {e.Result.Text}", "");
+                            string languageLong = textLanguges[e.Result.Translations.First().Key];
+                            UpdateTranslationUI($"English: {e.Result.Text}", $"{languageLong}: {e.Result.Translations.First().Value}");
 
                         }
                         catch (Exception)
@@ -394,6 +420,8 @@ namespace MTCSTLKiosk
             catch (Exception)
             {
                 // eat error
+                DisableUI();
+                await StartPreviewAsync();
             }
             return null;
         }
@@ -402,10 +430,6 @@ namespace MTCSTLKiosk
         {
             try
             {
-
-                if (isProcessingImage)
-                    return;
-                isProcessingImage = true;
                 Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ComputerVisionClient visionClient = new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ComputerVisionClient(
                     new ApiKeyServiceClientCredentials(settings.VisionKey),
                     new System.Net.Http.DelegatingHandler[] { });
@@ -470,7 +494,6 @@ namespace MTCSTLKiosk
             {
                 // eat this exception too
             }
-            isProcessingImage = false;
         }
 
         private void UpdateWithAnalysis(ImageAnalysis analysis)
