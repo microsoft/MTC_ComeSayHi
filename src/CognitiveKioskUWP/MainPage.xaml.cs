@@ -57,10 +57,10 @@ namespace MTCSTLKiosk
             timerFace.Interval = new TimeSpan(0, 0, 2);
             timerTakePicture = new DispatcherTimer();
             timerTakePicture.Tick += TimerTakePicture_Tick;
-            timerTakePicture.Interval = new TimeSpan(0, 0, 0, 0, 100);
+            timerTakePicture.Interval = new TimeSpan(0, 0, 0, 1, 0);
             timerFailsafe = new DispatcherTimer();
             timerFailsafe.Tick += TimerFailsafe_Tick;
-            timerFailsafe.Interval = new TimeSpan(0, 0, 1, 0, 0);
+            timerFailsafe.Interval = new TimeSpan(0, 0, 10, 0, 0);
             timerFailsafe.Start();
 
             await StartPreviewAsync();
@@ -156,6 +156,8 @@ namespace MTCSTLKiosk
                 var resolutions = mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.Photo).ToList();
 
                 Windows.Media.MediaProperties.VideoEncodingProperties reslution = (Windows.Media.MediaProperties.VideoEncodingProperties)resolutions.Where(x => x.Type == "Video").OrderByDescending(x => ((Windows.Media.MediaProperties.VideoEncodingProperties)x).Width).FirstOrDefault();
+
+
                 // set used resolution
                 await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.Photo, reslution);
 
@@ -210,7 +212,7 @@ namespace MTCSTLKiosk
                 await mediaCapture3.StartPreviewAsync();
                 await mediaCapture4.StartPreviewAsync();
             }
-            catch (System.IO.FileLoadException)
+            catch (Exception)
             {
                 //mediaCapture.CaptureDeviceExclusiveControlStatusChanged += MediaCapture_CaptureDeviceExclusiveControlStatusChanged; ;
             }
@@ -223,7 +225,7 @@ namespace MTCSTLKiosk
             {
                 try
                 {
-                    if (!isFaceFound)
+                    if (!isFaceFound || DateTime.Now.Subtract(faceLastDate).TotalMinutes > 5)
                     {
                         Analytics.TrackEvent("Faces found, starting capture");
                         isFaceFound = true;
@@ -420,8 +422,6 @@ namespace MTCSTLKiosk
             catch (Exception)
             {
                 // eat error
-                DisableUI();
-                await StartPreviewAsync();
             }
             return null;
         }
