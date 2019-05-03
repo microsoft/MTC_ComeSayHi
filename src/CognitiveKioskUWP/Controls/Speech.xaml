@@ -1,0 +1,21 @@
+﻿<UserControl
+    x:Class="MTCSTLKiosk.Controls.Speech"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:MTCSTLKiosk.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <Grid x:Name="mainGrid" Background="Transparent">
+        <CaptureElement x:Name="captureControl" Margin="20" Stretch="UniformToFill" IsHitTestVisible="False"/>
+        <Border x:Name="borderTranslation" VerticalAlignment="Bottom" Background="#996E6E6E" Margin="20">
+            <StackPanel>
+                <TextBlock x:Name="textTranslationOriginal" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="30" TextAlignment="Left" Foreground="White" MaxLines="1" TextTrimming="CharacterEllipsis"/>
+                <TextBlock x:Name="textTranslation" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="30" TextAlignment="Left" Foreground="White" MaxLines="1" TextTrimming="CharacterEllipsis"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

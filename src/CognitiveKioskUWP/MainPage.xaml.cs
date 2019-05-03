@@ -203,9 +203,9 @@ namespace MTCSTLKiosk
 
             try
             {
-                captureTopLeft.Source = mediaCapture;
-                captureTopRight.Source = mediaCapture2;
-                captureBottomLeft.Source = mediaCapture3;
+                captionsControl.MainCapture.Source = mediaCapture;
+                speechControl.MainCapture.Source = mediaCapture2;
+                tagsControl.MainCapture.Source = mediaCapture3;
                 captureBottomRight.Source = mediaCapture4;
                 await mediaCapture.StartPreviewAsync();
                 await mediaCapture2.StartPreviewAsync();
@@ -250,11 +250,10 @@ namespace MTCSTLKiosk
 
         private async Task ActivateUI()
         {
-            gridCaptureBottomLeft.Visibility = Visibility.Visible;
+            tagsControl.Visibility = Visibility.Visible;
             gridCaptureBottomRight.Visibility = Visibility.Visible;
-            gridCaptureTopLeft.Visibility = Visibility.Visible;
-            gridCaptureTopRight.Visibility = Visibility.Visible;
-            borderTranslation.Visibility = Visibility.Visible;
+            captionsControl.Visibility = Visibility.Visible;
+            speechControl.Visibility = Visibility.Visible;
             timerTakePicture.Start();
             UpdateTranslationUI($"Warming Up Translation", "");
             try
@@ -270,10 +269,10 @@ namespace MTCSTLKiosk
 
         private void DisableUI()
         {
-            gridCaptureBottomLeft.Visibility = Visibility.Collapsed;
+            tagsControl.Visibility = Visibility.Collapsed;
             gridCaptureBottomRight.Visibility = Visibility.Collapsed;
-            gridCaptureTopLeft.Visibility = Visibility.Collapsed;
-            gridCaptureTopRight.Visibility = Visibility.Collapsed;
+            captionsControl.Visibility = Visibility.Collapsed;
+            speechControl.Visibility = Visibility.Collapsed;
             if (timerTakePicture != null)
                 timerTakePicture.Stop();
             isFaceFound = false;
@@ -381,15 +380,13 @@ namespace MTCSTLKiosk
         {
             if (Dispatcher.HasThreadAccess)
             {
-                textTranslation.Text = messageTranslation;
-                textTranslationOriginal.Text = messageOriginal;
+                speechControl.UpdateEvent(new CognitiveEvent() { PrimarySpeechMessage = messageOriginal, SecondarySpeechMessage = messageTranslation });
             }
             else
             {
                 var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                 {
-                    textTranslation.Text = messageTranslation;
-                    textTranslationOriginal.Text = messageOriginal;
+                    speechControl.UpdateEvent(new CognitiveEvent() { PrimarySpeechMessage = messageOriginal, SecondarySpeechMessage = messageTranslation });
                 });
             }
         }
@@ -499,13 +496,16 @@ namespace MTCSTLKiosk
         private void UpdateWithAnalysis(ImageAnalysis analysis)
         {
             try
-            {
-                if (analysis.Description.Captions.Count > 0)
+           {
+                if (Dispatcher.HasThreadAccess)
                 {
-                    UpdateDescription(analysis.Description.Captions.FirstOrDefault().Text);
+                    captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis });
+                    tagsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis });
                 }
-
-                UpdateTags(string.Join(",", analysis.Tags.Select(x => x.Name)));
+                else
+                {
+                    var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis }); tagsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis }); });
+                }
             }
             catch (Exception)
             {
@@ -514,18 +514,6 @@ namespace MTCSTLKiosk
             }
         }
 
-        private void UpdateDescription(string message)
-        {
-
-            if (Dispatcher.HasThreadAccess)
-            {
-                textDescription.Text = message;
-            }
-            else
-            {
-                var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => textDescription.Text = message);
-            }
-        }
         private void UpdateFaces(Microsoft.Rest.HttpOperationResponse<System.Collections.Generic.IList<Microsoft.Azure.CognitiveServices.Vision.Face.Models.DetectedFace>> message, int imageHeight, int imageWidth)
         {
             try
@@ -660,18 +648,6 @@ namespace MTCSTLKiosk
                 //Eat excepiton
             }
 
-        }
-        private void UpdateTags(string message)
-        {
-
-            if (Dispatcher.HasThreadAccess)
-            {
-                textTags.Text = message;
-            }
-            else
-            {
-                var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => textTags.Text = message);
-            }
         }
         #endregion
 

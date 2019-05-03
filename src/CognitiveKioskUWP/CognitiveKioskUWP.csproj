@@ -106,6 +106,17 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CognitiveEvent.cs" />
+    <Compile Include="Controls\Captions.xaml.cs">
+      <DependentUpon>Captions.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\IQuarterControl.cs" />
+    <Compile Include="Controls\Speech.xaml.cs">
+      <DependentUpon>Speech.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Tags.xaml.cs">
+      <DependentUpon>Tags.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
@@ -140,6 +151,18 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\Captions.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Speech.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Tags.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -151,13 +174,13 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AppCenter.Analytics">
-      <Version>1.9.0</Version>
+      <Version>1.14.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.AppCenter.Crashes">
-      <Version>1.9.0</Version>
+      <Version>1.14.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Azure.CognitiveServices.Vision.ComputerVision">
-      <Version>3.2.0</Version>
+      <Version>4.0.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Azure.CognitiveServices.Vision.Face">
       <Version>2.2.0-preview</Version>
@@ -166,12 +189,13 @@
       <Version>4.0.0-alpha-m1.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.CognitiveServices.Speech">
-      <Version>1.0.0</Version>
+      <Version>1.4.2</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
-      <Version>6.1.7</Version>
+      <Version>6.2.8</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
