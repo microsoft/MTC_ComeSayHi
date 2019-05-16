@@ -12,5 +12,6 @@ namespace MTCSTLKiosk.Controls
         CaptureElement MainCapture { get;  }
 
         void UpdateEvent(CognitiveEvent mainEvent);
+
     }
 }

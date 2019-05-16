@@ -206,7 +206,7 @@ namespace MTCSTLKiosk
                 captionsControl.MainCapture.Source = mediaCapture;
                 speechControl.MainCapture.Source = mediaCapture2;
                 tagsControl.MainCapture.Source = mediaCapture3;
-                captureBottomRight.Source = mediaCapture4;
+                facesControl.MainCapture.Source = mediaCapture4;
                 await mediaCapture.StartPreviewAsync();
                 await mediaCapture2.StartPreviewAsync();
                 await mediaCapture3.StartPreviewAsync();
@@ -251,7 +251,7 @@ namespace MTCSTLKiosk
         private async Task ActivateUI()
         {
             tagsControl.Visibility = Visibility.Visible;
-            gridCaptureBottomRight.Visibility = Visibility.Visible;
+            facesControl.Visibility = Visibility.Visible;
             captionsControl.Visibility = Visibility.Visible;
             speechControl.Visibility = Visibility.Visible;
             timerTakePicture.Start();
@@ -270,7 +270,7 @@ namespace MTCSTLKiosk
         private void DisableUI()
         {
             tagsControl.Visibility = Visibility.Collapsed;
-            gridCaptureBottomRight.Visibility = Visibility.Collapsed;
+            facesControl.Visibility = Visibility.Collapsed;
             captionsControl.Visibility = Visibility.Collapsed;
             speechControl.Visibility = Visibility.Collapsed;
             if (timerTakePicture != null)
@@ -323,7 +323,9 @@ namespace MTCSTLKiosk
 
                     recognizer.Recognized += (s, e) =>
                     {
-                        var result = e.Result;
+                        Debug.WriteLine($"Message received {e.Result.Text}");
+                        string languageLong = textLanguges[e.Result.Translations.First().Key];
+                        UpdateTranslationFinalUI($"{e.Result.Text}", $"{e.Result.Translations.First().Value}");
                     };
 
                     recognizer.Canceled += (s, e) =>
@@ -391,6 +393,21 @@ namespace MTCSTLKiosk
             }
         }
 
+        private void UpdateTranslationFinalUI(string messageOriginal, string messageTranslation)
+        {
+            if (Dispatcher.HasThreadAccess)
+            {
+                speechControl.UpdateEvent(new CognitiveEvent() { PrimarySpeechMessageFinal = messageOriginal, SecondarySpeechMessageFinal = messageTranslation });
+            }
+            else
+            {
+                var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    speechControl.UpdateEvent(new CognitiveEvent() { PrimarySpeechMessageFinal = messageOriginal, SecondarySpeechMessageFinal = messageTranslation });
+                });
+            }
+        }
+
         #endregion
 
         #region Computer Vision
@@ -430,10 +447,11 @@ namespace MTCSTLKiosk
                 Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ComputerVisionClient visionClient = new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ComputerVisionClient(
                     new ApiKeyServiceClientCredentials(settings.VisionKey),
                     new System.Net.Http.DelegatingHandler[] { });
-
+                
                 Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient faceClient = new Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient(
                     new ApiKeyServiceClientCredentials(settings.FaceKey),
                     new System.Net.Http.DelegatingHandler[] { });
+
 
                 visionClient.Endpoint = $"https://{settings.VisionRegion}.api.cognitive.microsoft.com";
                 faceClient.Endpoint = $"https://{settings.FaceRegion}.api.cognitive.microsoft.com";
@@ -442,7 +460,7 @@ namespace MTCSTLKiosk
                         new List<VisualFeatureTypes>()
                     {
                     VisualFeatureTypes.Categories, VisualFeatureTypes.Description,
-                    VisualFeatureTypes.Tags, VisualFeatureTypes.Faces
+                    VisualFeatureTypes.Tags, VisualFeatureTypes.Faces, VisualFeatureTypes.Brands
                     };
                 // The list of Face attributes to return.
                 IList<FaceAttributeType> faceAttributes =
@@ -477,7 +495,7 @@ namespace MTCSTLKiosk
                         await encoder.FlushAsync();
 
                         var analysisFace = await faceClient.Face.DetectWithStreamWithHttpMessagesAsync(ms.AsStream(), returnFaceAttributes: faceAttributes);
-                        UpdateFaces(analysisFace, image.PixelHeight, image.PixelWidth);
+                        facesControl.UpdateEvent(new CognitiveEvent() { Faces = analysisFace.Body, ImageWidth = image.PixelWidth, ImageHeight = image.PixelHeight });
                     }
 
                 }
@@ -514,141 +532,6 @@ namespace MTCSTLKiosk
             }
         }
 
-        private void UpdateFaces(Microsoft.Rest.HttpOperationResponse<System.Collections.Generic.IList<Microsoft.Azure.CognitiveServices.Vision.Face.Models.DetectedFace>> message, int imageHeight, int imageWidth)
-        {
-            try
-            {
-                var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-                {
-
-                    textFaces1.Text = "";
-                    textFaces2.Text = "";
-                    textFaces3.Text = "";
-
-                    if (message.Body.Count() >= 3)
-                    {
-                        ageControl1.Visibility = Visibility.Visible;
-                        ageControl2.Visibility = Visibility.Visible;
-                        ageControl3.Visibility = Visibility.Visible;
-                    }
-                    else if (message.Body.Count() >= 2)
-                    {
-                        ageControl1.Visibility = Visibility.Visible;
-                        ageControl2.Visibility = Visibility.Visible;
-                        ageControl3.Visibility = Visibility.Collapsed;
-
-                    }
-                    else if (message.Body.Count() >= 1)
-                    {
-                        ageControl1.Visibility = Visibility.Visible;
-                        ageControl2.Visibility = Visibility.Collapsed;
-                        ageControl3.Visibility = Visibility.Collapsed;
-
-                    }
-                    else if (message.Body.Count() >= 0)
-                    {
-                        ageControl1.Visibility = Visibility.Collapsed;
-                        ageControl2.Visibility = Visibility.Collapsed;
-                        ageControl3.Visibility = Visibility.Collapsed;
-
-                    }
-                    var facesSorted = message.Body.OrderBy(x => x.FaceRectangle.Left);
-                    for (int i = 0; i < facesSorted.Count(); i++)
-                    {
-                        var face = message.Body[i];
-
-                        int convertedTop = ((face.FaceRectangle.Top * (int)captureBottomRight.ActualHeight) / imageHeight) - ((int)captureBottomRight.Margin.Top) - ((int)ageControl1.ActualHeight * 2);
-                        int convertedLeft = ((face.FaceRectangle.Left * (int)captureBottomRight.ActualWidth) / imageWidth);
-
-                        double maxEmotion = face.FaceAttributes.Emotion.Anger;
-                        string choosenEmotion = "Anger";
-
-                        if (face.FaceAttributes.Emotion.Contempt > maxEmotion)
-                        {
-                            maxEmotion = face.FaceAttributes.Emotion.Contempt;
-                            choosenEmotion = "Contempt";
-                        }
-
-                        if (face.FaceAttributes.Emotion.Disgust > maxEmotion)
-                        {
-                            maxEmotion = face.FaceAttributes.Emotion.Disgust;
-                            choosenEmotion = "Disgust";
-                        }
-
-                        if (face.FaceAttributes.Emotion.Fear > maxEmotion)
-                        {
-                            maxEmotion = face.FaceAttributes.Emotion.Fear;
-                            choosenEmotion = "Fear";
-                        }
-
-                        if (face.FaceAttributes.Emotion.Happiness > maxEmotion)
-                        {
-                            maxEmotion = face.FaceAttributes.Emotion.Happiness;
-                            choosenEmotion = "Happiness";
-                        }
-
-                        if (face.FaceAttributes.Emotion.Neutral > maxEmotion)
-                        {
-                            maxEmotion = face.FaceAttributes.Emotion.Neutral;
-                            choosenEmotion = "Neutral";
-                        }
-
-                        if (face.FaceAttributes.Emotion.Sadness > maxEmotion)
-                        {
-                            maxEmotion = face.FaceAttributes.Emotion.Sadness;
-                            choosenEmotion = "Sadness";
-                        }
-
-                        if (face.FaceAttributes.Emotion.Surprise > maxEmotion)
-                        {
-                            maxEmotion = face.FaceAttributes.Emotion.Surprise;
-                            choosenEmotion = "Surprise";
-                        }
-                        string hair = "";
-                        if (face.FaceAttributes.Hair.Bald > .6)
-                            hair = "bald";
-                        else
-                        {
-                            if(face.FaceAttributes.Hair.HairColor.Count > 0)
-                             hair = face.FaceAttributes.Hair.HairColor.First().Color.ToString();
-                        }
-                        string userInfo = $"{i + 1}: {face.FaceAttributes.Gender.ToString()} ({face.FaceAttributes.Age.ToString()})\nEmotion: {choosenEmotion} \nGlasses: {face.FaceAttributes.Glasses.ToString()} \nSmile: {face.FaceAttributes.Smile.ToString()} \nHair: {hair} ";
-
-                        AgeControl ageControl = null;
-
-                        switch (i)
-                        {
-                            case 0:
-                                ageControl = ageControl1;
-                                textFaces1.Text = userInfo;
-                                break;
-                            case 1:
-                                ageControl = ageControl2;
-                                textFaces2.Text = userInfo;
-                                break;
-                            case 2:
-                                ageControl = ageControl3;
-                                textFaces3.Text = userInfo;
-                                break;
-                        }
-
-                        if (ageControl == null)
-                            break;
-
-                        ageControl.Margin = new Thickness(convertedLeft, convertedTop, 0, 0);
-                        ageControl.Visibility = Visibility;
-                        ageControl.SetUserInfo(i + 1, face.FaceAttributes.Gender.ToString(), face.FaceAttributes.Age, choosenEmotion);
-
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-                //Eat excepiton
-            }
-
-        }
         #endregion
 
         private void Settings_Tapped(object sender, TappedRoutedEventArgs e)

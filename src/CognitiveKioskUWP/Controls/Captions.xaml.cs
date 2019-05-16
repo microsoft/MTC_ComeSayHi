@@ -32,6 +32,10 @@ namespace MTCSTLKiosk.Controls
             {
                 textDescription.Text = mainEvent.ImageAnalysis.Description.Captions.FirstOrDefault().Text;
             }
+            if (mainEvent.ImageAnalysis.Brands != null && mainEvent.ImageAnalysis.Brands.Count > 0)
+            {
+                textDescription.Text += "\n\n" + mainEvent.ImageAnalysis.Brands.First().Name + " Logo";
+            }
         }
     }
 }
