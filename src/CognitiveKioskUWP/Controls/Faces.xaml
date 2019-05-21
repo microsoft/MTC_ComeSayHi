@@ -13,7 +13,7 @@
     <Grid x:Name="gridCaptureBottomRight" Background="Transparent">
         <CaptureElement x:Name="captureControl" Margin="20" Stretch="UniformToFill" IsHitTestVisible="False"/>
         <Border VerticalAlignment="Bottom" Background="#82F25022" Margin="20">
-            <Grid>
+            <Grid Visibility="Collapsed">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width=".5*"/>
                     <ColumnDefinition Width=".5*"/>

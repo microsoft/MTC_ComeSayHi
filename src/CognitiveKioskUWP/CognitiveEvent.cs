@@ -10,6 +10,7 @@ namespace MTCSTLKiosk
     public class CognitiveEvent
     {
         public ImageAnalysis ImageAnalysis { get; set; }
+        public bool ClearData = false;
 
         public string PrimarySpeechMessage { get; set; }
         public string SecondarySpeechMessage { get; set; }

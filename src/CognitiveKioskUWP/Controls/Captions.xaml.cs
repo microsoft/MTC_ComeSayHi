@@ -28,6 +28,7 @@ namespace MTCSTLKiosk.Controls
 
         public void UpdateEvent(CognitiveEvent mainEvent)
         {
+          
             if (mainEvent.ImageAnalysis.Description.Captions.Count > 0)
             {
                 textDescription.Text = mainEvent.ImageAnalysis.Description.Captions.FirstOrDefault().Text;

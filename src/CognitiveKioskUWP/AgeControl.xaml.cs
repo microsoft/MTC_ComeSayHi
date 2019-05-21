@@ -37,40 +37,40 @@ namespace MTCSTLKiosk
         public void SetUserInfo(int number, string sex, double? age, string  emotion)
         {
           
-            textUser.Text = number.ToString() + ": " + sex + " (" + age.ToString() + ")";
+            textUser.Text = number.ToString();
 
-            if(emotion  == "Anger")
-            {
-                textSymbol.Text = emojiAnger;
-            }
-            if (emotion == "Contempt")
-            {
-                textSymbol.Text = emojiContempt;
-            }
-            if (emotion == "Disgust")
-            {
-                textSymbol.Text = emojiDisgust;
-            }
-            if (emotion == "Fear")
-            {
-                textSymbol.Text = emojiFear;
-            }
-            if (emotion == "Happiness")
-            {
-                textSymbol.Text = emojiHappiness;
-            }
-            if (emotion == "Neutral")
-            {
-                textSymbol.Text = emojiNeutral;
-            }
-            if (emotion == "Sadness")
-            {
-                textSymbol.Text = emojiSad;
-            }
-            if (emotion == "Surprise")
-            {
-                textSymbol.Text = emojiSuprise;
-            }
+            //if(emotion  == "Anger")
+            //{
+            //    textSymbol.Text = emojiAnger;
+            //}
+            //if (emotion == "Contempt")
+            //{
+            //    textSymbol.Text = emojiContempt;
+            //}
+            //if (emotion == "Disgust")
+            //{
+            //    textSymbol.Text = emojiDisgust;
+            //}
+            //if (emotion == "Fear")
+            //{
+            //    textSymbol.Text = emojiFear;
+            //}
+            //if (emotion == "Happiness")
+            //{
+            //    textSymbol.Text = emojiHappiness;
+            //}
+            //if (emotion == "Neutral")
+            //{
+            //    textSymbol.Text = emojiNeutral;
+            //}
+            //if (emotion == "Sadness")
+            //{
+            //    textSymbol.Text = emojiSad;
+            //}
+            //if (emotion == "Surprise")
+            //{
+            //    textSymbol.Text = emojiSuprise;
+            //}
         }
     }
 }

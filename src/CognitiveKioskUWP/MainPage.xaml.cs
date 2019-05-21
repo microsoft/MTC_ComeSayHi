@@ -273,6 +273,7 @@ namespace MTCSTLKiosk
             facesControl.Visibility = Visibility.Collapsed;
             captionsControl.Visibility = Visibility.Collapsed;
             speechControl.Visibility = Visibility.Collapsed;
+            speechControl.UpdateEvent(new CognitiveEvent() { ClearData = true });
             if (timerTakePicture != null)
                 timerTakePicture.Stop();
             isFaceFound = false;
