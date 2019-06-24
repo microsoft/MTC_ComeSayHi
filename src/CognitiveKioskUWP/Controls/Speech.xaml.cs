@@ -46,8 +46,6 @@ namespace MTCSTLKiosk.Controls
             {
                 textTranslationOriginal.Text = mainEvent.PrimarySpeechMessageFinal + "\n\n" + textTranslationOriginal.Text;
                 textTranslation.Text = mainEvent.SecondarySpeechMessageFinal + "\n\n" + textTranslation.Text;
-                textTranslationOriginalRT.Text = "";
-                textTranslationRT.Text = "";
             }
         }
     }

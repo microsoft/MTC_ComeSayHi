@@ -20,9 +20,11 @@ namespace MTCSTLKiosk
 {
     public sealed partial class AgeControl : UserControl
     {
+        private Settings settings;
         public AgeControl()
         {
             this.InitializeComponent();
+            settings = Settings.SingletonInstance;
         }
 
         private string emojiSad = char.ConvertFromUtf32(0x1f62d);
@@ -36,41 +38,50 @@ namespace MTCSTLKiosk
 
         public void SetUserInfo(int number, string sex, double? age, string  emotion)
         {
-          
-            textUser.Text = number.ToString();
 
-            //if(emotion  == "Anger")
-            //{
-            //    textSymbol.Text = emojiAnger;
-            //}
-            //if (emotion == "Contempt")
-            //{
-            //    textSymbol.Text = emojiContempt;
-            //}
-            //if (emotion == "Disgust")
-            //{
-            //    textSymbol.Text = emojiDisgust;
-            //}
-            //if (emotion == "Fear")
-            //{
-            //    textSymbol.Text = emojiFear;
-            //}
-            //if (emotion == "Happiness")
-            //{
-            //    textSymbol.Text = emojiHappiness;
-            //}
-            //if (emotion == "Neutral")
-            //{
-            //    textSymbol.Text = emojiNeutral;
-            //}
-            //if (emotion == "Sadness")
-            //{
-            //    textSymbol.Text = emojiSad;
-            //}
-            //if (emotion == "Surprise")
-            //{
-            //    textSymbol.Text = emojiSuprise;
-            //}
+            if (settings.ShowAgeAndGender)
+            {
+                textUser.Text = number.ToString() + ": " + sex + " (" + age.ToString() + ")";
+            }
+            else
+            {
+                textUser.Text = number.ToString();
+                textUser.Text += " " + emotion;
+            }
+
+            if (emotion == "Anger")
+            {
+                textSymbol.Text = emojiAnger;
+            }
+            if (emotion == "Contempt")
+            {
+                textSymbol.Text = emojiContempt;
+            }
+            if (emotion == "Disgust")
+            {
+                textSymbol.Text = emojiDisgust;
+            }
+            if (emotion == "Fear")
+            {
+                textSymbol.Text = emojiFear;
+            }
+            if (emotion == "Happiness")
+            {
+                textSymbol.Text = emojiHappiness;
+            }
+            if (emotion == "Neutral")
+            {
+                textSymbol.Text = emojiNeutral;
+            }
+            if (emotion == "Sadness")
+            {
+                textSymbol.Text = emojiSad;
+            }
+            if (emotion == "Surprise")
+            {
+                textSymbol.Text = emojiSuprise;
+            }
+
         }
     }
 }

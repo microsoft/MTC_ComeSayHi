@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.ApplicationModel;
 using Windows.Devices.Enumeration;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -53,6 +54,17 @@ namespace MTCSTLKiosk
             dropdownCamera.ItemsSource = devices.Select(x => x.Name).ToArray();
 
             dropdownCamera.SelectedValue = settings.CameraKey;
+
+            textSettings.Text = "Settings v." + GetAppVersion();
+        }
+
+        public static string GetAppVersion()
+        {
+            Package package = Package.Current;
+            PackageId packageId = package.Id;
+            PackageVersion version = packageId.Version;
+
+            return string.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Build, version.Revision);
         }
 
         private void buttonClose_Click(object sender, RoutedEventArgs e)
@@ -113,6 +125,12 @@ namespace MTCSTLKiosk
 
             // Execute the default application for the mailto protocol
             await Launcher.LaunchUriAsync(mailtoUri);
+        }
+
+        private void ToggleShowAge_Toggled(object sender, RoutedEventArgs e)
+        {
+
+            settings.ShowAgeAndGender = toggleShowAge.IsOn;
         }
     }
 }

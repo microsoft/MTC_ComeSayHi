@@ -19,7 +19,7 @@
             VerticalScrollBarVisibility="Auto"
             VerticalScrollMode="Auto">
             <StackPanel Orientation="Vertical">
-                <TextBlock Text="Settings" 
+                <TextBlock x:Name="textSettings" Text="Settings" 
                     Style="{StaticResource TitleTextBlockStyle}"
                     Margin="0,40,0,0"
                     FontWeight="Normal"/>
@@ -57,6 +57,10 @@
                         <ComboBox x:Name="dropdownFaceRegion"  Margin="5" SelectionChanged="dropdownFaceRegion_SelectionChanged">
                             <ComboBoxItem Content="east"></ComboBoxItem>
                         </ComboBox>
+                </StackPanel>
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Show age and gender (WARNING this is not recommended due to current MS policy)" Margin="5" ></TextBlock>
+                    <ToggleSwitch x:Name="toggleShowAge"  Margin="5" Toggled="ToggleShowAge_Toggled" />
                 </StackPanel>
                 <TextBlock Text="Hardware" 
                     Style="{StaticResource TitleTextBlockStyle}"
