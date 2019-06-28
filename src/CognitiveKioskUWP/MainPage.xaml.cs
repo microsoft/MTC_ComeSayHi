@@ -325,8 +325,11 @@ namespace MTCSTLKiosk
                     recognizer.Recognized += (s, e) =>
                     {
                         Debug.WriteLine($"Message received {e.Result.Text}");
-                        string languageLong = textLanguges[e.Result.Translations.First().Key];
-                        UpdateTranslationFinalUI($"{e.Result.Text}", $"{e.Result.Translations.First().Value}");
+                        if (e.Result.Translations.Count() > 0)
+                        {
+                            string languageLong = textLanguges[e.Result.Translations.FirstOrDefault().Key];
+                            UpdateTranslationFinalUI($"{e.Result.Text}", $"{e.Result.Translations.First().Value}");
+                        }
                     };
 
                     recognizer.Canceled += (s, e) =>
@@ -497,6 +500,32 @@ namespace MTCSTLKiosk
 
                         var analysisFace = await faceClient.Face.DetectWithStreamWithHttpMessagesAsync(ms.AsStream(), returnFaceAttributes: faceAttributes);
                         facesControl.UpdateEvent(new CognitiveEvent() { Faces = analysisFace.Body, ImageWidth = image.PixelWidth, ImageHeight = image.PixelHeight });
+
+                        if (analysisFace.Body.Count() > 0)
+                        {
+                            var groups = await faceClient.PersonGroup.ListWithHttpMessagesAsync();
+                            var group = groups.Body.FirstOrDefault(x => x.Name == settings.GroupName);
+                            if (group != null)
+                            {
+                                var results = await faceClient.Face.IdentifyWithHttpMessagesAsync(analysisFace.Body.Select(x => x.FaceId.Value).ToArray(), group.PersonGroupId);
+                                foreach (var identifyResult in results.Body)
+                                {
+                                    var cand = identifyResult.Candidates.FirstOrDefault(x => x.Confidence > .4);
+                                    if (cand == null)
+                                    {
+                                        Console.WriteLine("No one identified");
+                                    }
+                                    else
+                                    {
+                                        // Get top 1 among all candidates returned
+                                        var candidateId = cand.PersonId;
+                                        var person = await faceClient.PersonGroupPerson.GetWithHttpMessagesAsync(group.PersonGroupId, candidateId);
+                                        tagsControl.UpdateEvent(new CognitiveEvent() { IdentifiedPerson = person.Body });
+                                        Console.WriteLine("Identified as {0}", person.Body.Name);
+                                    }
+                                }
+                            }
+                        }
                     }
 
                 }

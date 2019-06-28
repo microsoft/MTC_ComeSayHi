@@ -67,6 +67,14 @@ namespace MTCSTLKiosk
             set { localSettings.Values["SpeechKey"] = value; }
         }
 
+        public string GroupName
+        {
+            get
+            {
+                return "MTC CSH FACES";
+            }
+        }
+
         public string VisionKey
         {
             get

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,6 +20,9 @@ namespace MTCSTLKiosk.Controls
 {
     public sealed partial class Tags : UserControl, IQuarterControl
     {
+        List<Person> people = new List<Person>();
+        DateTime lastRefresh = DateTime.Now.AddDays(-1);
+
         public Tags()
         {
             this.InitializeComponent();
@@ -28,8 +32,26 @@ namespace MTCSTLKiosk.Controls
 
         public void UpdateEvent(CognitiveEvent mainEvent)
         {
+            if (lastRefresh < DateTime.Now.AddMinutes(-1))
+            {
+                lastRefresh = DateTime.Now;
+                people.Clear();
+                borderTop.Visibility = Visibility.Collapsed;
+            }
+            if (mainEvent.ImageAnalysis != null)
+            {
+                textTags.Text = string.Join(",", mainEvent.ImageAnalysis.Tags.Select(x => x.Name));
+            }
+            if (mainEvent.IdentifiedPerson != null)
+            {
+                borderTop.Visibility = Visibility.Visible;
 
-            textTags.Text = string.Join(",", mainEvent.ImageAnalysis.Tags.Select(x => x.Name));
+                if (people.Count(x=>x.Name == mainEvent.IdentifiedPerson.Name) == 0)
+                {
+                    people.Add(mainEvent.IdentifiedPerson);
+                }
+                textPeople.Text = "Welcome back " + string.Join(" and ",people.Select(x => x.Name).ToArray());
+            }
         }
     }
 }
