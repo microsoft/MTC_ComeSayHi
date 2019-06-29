@@ -9,6 +9,9 @@
 *.userosscache
 *.sln.docstates
 
+# Key files
+CognitiveKioskUWP_TemporaryKey.pfx
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
