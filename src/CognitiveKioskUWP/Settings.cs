@@ -44,6 +44,18 @@ namespace MTCSTLKiosk
             set { localSettings.Values["CameraKey"] = value; }
         }
 
+        public bool ShowAgeAndGender
+        {
+            get
+            {
+                if (localSettings.Values.ContainsKey("ShowAgeAndGender"))
+                    return (bool)localSettings.Values["ShowAgeAndGender"];
+                else
+                    return false;
+            }
+            set { localSettings.Values["ShowAgeAndGender"] = value; }
+        }
+
         public string SpeechKey
         {
             get {
@@ -53,6 +65,14 @@ namespace MTCSTLKiosk
                     return string.Empty;
             }
             set { localSettings.Values["SpeechKey"] = value; }
+        }
+
+        public string GroupName
+        {
+            get
+            {
+                return "MTC CSH FACES";
+            }
         }
 
         public string VisionKey

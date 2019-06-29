@@ -10,7 +10,7 @@
     Width="120">
 
     <Grid Background="#FF00A4EF">
-        <TextBlock x:Name="textSymbol" Visibility="Collapsed" HorizontalAlignment="Right" Text="&#x1F622;"  VerticalAlignment="Center"  FocusVisualPrimaryBrush="#737373" Foreground="White" FontSize="12" FontWeight="Bold" FontFamily="Segoe UI Emoji" Margin="0,0,5,0" IsColorFontEnabled="False"/>
+        <TextBlock x:Name="textSymbol" HorizontalAlignment="Right" Text="&#x1F622;"  VerticalAlignment="Center"  FocusVisualPrimaryBrush="#737373" Foreground="White" FontSize="12" FontWeight="Bold" FontFamily="Segoe UI Emoji" Margin="0,0,5,0" IsColorFontEnabled="False"/>
         <TextBlock x:Name="textUser" TextAlignment="Center" VerticalAlignment="Center" Text="Female - 35" TextWrapping="Wrap" FocusVisualPrimaryBrush="#737373" Foreground="#fff" FontSize="12" FontWeight="Bold" FontFamily="Segoe UI" Margin="5,0,0,0"/>
 
     </Grid>

@@ -20,9 +20,11 @@ namespace MTCSTLKiosk.Controls
 {
     public sealed partial class Faces : UserControl, IQuarterControl
     {
+        private Settings settings;
         public Faces()
         {
             this.InitializeComponent();
+            settings = Settings.SingletonInstance;
         }
 
         public CaptureElement MainCapture { get { return captureControl; } }
@@ -35,6 +37,24 @@ namespace MTCSTLKiosk.Controls
             {
                 var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                 {
+                    try
+                    {
+                        if(faces.Count() == 0)
+                        {
+                            textFaceTotal.Text = $"I don't see anyone!  Smile!";
+
+                        }
+                        else
+                        {
+                            textFaceTotal.Text = $"{faces.Count.ToString()} faces with {faces.Average(x => x.FaceAttributes.Emotion.Happiness).ToString("0.0%")} happiness";
+
+                        }
+
+                    }
+                    catch (Exception)
+                    {
+                        textFaceTotal.Text = "";
+                    }
 
                     textFaces1.Text = "";
                     textFaces2.Text = "";
