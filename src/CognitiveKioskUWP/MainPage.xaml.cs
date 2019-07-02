@@ -2,6 +2,8 @@
 using Microsoft.AppCenter.Analytics;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
+using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction;
+using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction.Models;
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Translation;
@@ -451,7 +453,14 @@ namespace MTCSTLKiosk
                 Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ComputerVisionClient visionClient = new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ComputerVisionClient(
                     new ApiKeyServiceClientCredentials(settings.VisionKey),
                     new System.Net.Http.DelegatingHandler[] { });
-                
+
+                // Create a prediction endpoint, passing in the obtained prediction key
+                CustomVisionPredictionClient customVisionClient = new CustomVisionPredictionClient()
+                {
+                    ApiKey = settings.CustomVisionKey,
+                    Endpoint = $"https://{settings.CustomVisionRegion}.api.cognitive.microsoft.com"
+                };
+
                 Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient faceClient = new Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient(
                     new ApiKeyServiceClientCredentials(settings.FaceKey),
                     new System.Net.Http.DelegatingHandler[] { });
@@ -479,14 +488,32 @@ namespace MTCSTLKiosk
                 {
                     if (DateTime.Now.Subtract(imageAnalysisLastDate).TotalSeconds > 1)
                     {
-                        using (var ms = new InMemoryRandomAccessStream())
+                        using (var msVision = new InMemoryRandomAccessStream())
                         {
-                            BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, ms);
+                            BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, msVision);
                             encoder.SetSoftwareBitmap(image);
                             await encoder.FlushAsync();
 
-                            var analysis = await visionClient.AnalyzeImageInStreamAsync(ms.AsStream(), features);
-                            UpdateWithAnalysis(analysis);
+                            var analysis = await visionClient.AnalyzeImageInStreamAsync(msVision.AsStream(), features);
+                            ImagePrediction analysisCV = null;
+
+                            using (var msCustomVision = new InMemoryRandomAccessStream())
+                            {
+                                 encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, msCustomVision);
+                                encoder.SetSoftwareBitmap(image);
+                                await encoder.FlushAsync();
+                                try
+                                {
+                                    analysisCV = await customVisionClient.DetectImageWithNoStoreAsync(new Guid(settings.CustomVisionProjectId), settings.CustomVisionIterationName, msCustomVision.AsStream());
+
+                                }
+                                catch (Exception)
+                                {
+                                    // Throw away error
+                                }
+                            }
+
+                            UpdateWithAnalysis(analysis, analysisCV);
                         }
                         imageAnalysisLastDate = DateTime.Now;
                     }
@@ -501,7 +528,7 @@ namespace MTCSTLKiosk
                         var analysisFace = await faceClient.Face.DetectWithStreamWithHttpMessagesAsync(ms.AsStream(), returnFaceAttributes: faceAttributes);
                         facesControl.UpdateEvent(new CognitiveEvent() { Faces = analysisFace.Body, ImageWidth = image.PixelWidth, ImageHeight = image.PixelHeight });
 
-                        if (analysisFace.Body.Count() > 0)
+                        if (analysisFace.Body.Count() > 0 && settings.DoFaceDetection)
                         {
                             var groups = await faceClient.PersonGroup.ListWithHttpMessagesAsync();
                             var group = groups.Body.FirstOrDefault(x => x.Name == settings.GroupName);
@@ -510,7 +537,7 @@ namespace MTCSTLKiosk
                                 var results = await faceClient.Face.IdentifyWithHttpMessagesAsync(analysisFace.Body.Select(x => x.FaceId.Value).ToArray(), group.PersonGroupId);
                                 foreach (var identifyResult in results.Body)
                                 {
-                                    var cand = identifyResult.Candidates.FirstOrDefault(x => x.Confidence > .4);
+                                    var cand = identifyResult.Candidates.FirstOrDefault(x => x.Confidence > settings.FaceThreshold / 100d);
                                     if (cand == null)
                                     {
                                         Console.WriteLine("No one identified");
@@ -520,7 +547,7 @@ namespace MTCSTLKiosk
                                         // Get top 1 among all candidates returned
                                         var candidateId = cand.PersonId;
                                         var person = await faceClient.PersonGroupPerson.GetWithHttpMessagesAsync(group.PersonGroupId, candidateId);
-                                        tagsControl.UpdateEvent(new CognitiveEvent() { IdentifiedPerson = person.Body });
+                                        tagsControl.UpdateEvent(new CognitiveEvent() { IdentifiedPerson = person.Body, IdentifiedPersonPrediction = cand.Confidence });
                                         Console.WriteLine("Identified as {0}", person.Body.Name);
                                     }
                                 }
@@ -541,14 +568,14 @@ namespace MTCSTLKiosk
             }
         }
 
-        private void UpdateWithAnalysis(ImageAnalysis analysis)
+        private void UpdateWithAnalysis(ImageAnalysis analysis, ImagePrediction analysisCV)
         {
             try
            {
                 if (Dispatcher.HasThreadAccess)
                 {
-                    captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis });
-                    tagsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis });
+                    captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageAnalysisCV = analysisCV });
+                    tagsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageAnalysisCV = analysisCV });
                 }
                 else
                 {

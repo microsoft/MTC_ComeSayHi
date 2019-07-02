@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -22,10 +23,12 @@ namespace MTCSTLKiosk.Controls
     {
         List<Person> people = new List<Person>();
         DateTime lastRefresh = DateTime.Now.AddDays(-1);
+        private Settings settings;
 
         public Tags()
         {
             this.InitializeComponent();
+            settings = Settings.SingletonInstance;
         }
 
         public CaptureElement MainCapture { get { return captureControl; } }
@@ -38,9 +41,25 @@ namespace MTCSTLKiosk.Controls
                 people.Clear();
                 borderTop.Visibility = Visibility.Collapsed;
             }
-            if (mainEvent.ImageAnalysis != null)
+            try
             {
-                textTags.Text = string.Join(",", mainEvent.ImageAnalysis.Tags.Select(x => x.Name));
+                if (mainEvent.ImageAnalysis != null)
+                {
+                    textTags.Text = "Pretrained: ";
+                    textTags.Text += string.Join(",", mainEvent.ImageAnalysis.Tags.Select(x => x.Name));
+                    if(mainEvent.ImageAnalysisCV != null && mainEvent.ImageAnalysisCV.Predictions != null)
+                    {
+                        var preds = mainEvent.ImageAnalysisCV.Predictions.Where(x => x.Probability >= settings.CustomVisionThreshold / 100d);
+                        if(preds.Count() > 0)
+                            textTags.Text += "\n\nCustom Vision: " + string.Join(",", preds.Select(x => x.TagName).Distinct());
+                    }
+                }
+
+            }
+            catch (Exception)
+            {
+
+                textTags.Text += "\n Image analysis failed";
             }
             if (mainEvent.IdentifiedPerson != null)
             {

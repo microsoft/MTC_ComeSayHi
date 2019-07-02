@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
+using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.Devices.Enumeration;
 using Windows.Foundation;
@@ -29,7 +31,7 @@ namespace MTCSTLKiosk
     /// </summary>
     public sealed partial class SettingsPage : Page
     {
-        private Settings settings;
+        private Settings settings = Settings.SingletonInstance;
 
         bool groupsLoading = false;
         public SettingsPage()
@@ -40,20 +42,28 @@ namespace MTCSTLKiosk
 
         protected async override void OnNavigatedTo(NavigationEventArgs e)
         {
-            settings = Settings.SingletonInstance;
             dropdownRegion.ItemsSource = settings.Regions.ToArray();
             dropdownFaceRegion.ItemsSource = settings.Regions.ToArray();
             dropdownVisionRegion.ItemsSource = settings.Regions.ToArray();
+            dropdownCustomVisionRegion.ItemsSource = settings.Regions.ToArray();
 
             textFaceAPIKey.Text = settings.FaceKey;
             textVisionAPIKey.Text = settings.VisionKey;
             textSpeechAPIKey.Text = settings.SpeechKey;
+            textCustomVisionAPIKey.Text = settings.CustomVisionKey;
+
+            textCustomVisionProjectID.Text = settings.CustomVisionProjectId;
+            textCustomVisionIterationName.Text = settings.CustomVisionIterationName;
+            sliderCustomVision.Value = settings.CustomVisionThreshold;
+            sliderFaceDetect.Value = settings.FaceThreshold;
 
             dropdownRegion.SelectedValue = settings.SpeechRegion;
             dropdownVisionRegion.SelectedValue = settings.VisionRegion;
             dropdownFaceRegion.SelectedValue = settings.FaceRegion;
+            dropdownCustomVisionRegion.SelectedValue = settings.CustomVisionRegion;
 
             toggleShowAge.IsOn = settings.ShowAgeAndGender;
+            toggleFaceDetect.IsOn = settings.DoFaceDetection;
 
 
             var devices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
@@ -154,6 +164,7 @@ namespace MTCSTLKiosk
 
             }
         }
+
         private async System.Threading.Tasks.Task UpdatePerson(string person)
         {
             try
@@ -353,6 +364,42 @@ namespace MTCSTLKiosk
             {
                 await DeletePerson(dropdownPerson.SelectedItem.ToString());
             }
+        }
+
+        private void TextCustomVisionAPIKey_TextChanged(object sender, TextChangedEventArgs e)
+        {
+          settings.CustomVisionKey =  textCustomVisionAPIKey.Text;
+        }
+
+        private void DropdownCustomVisionRegion_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            settings.CustomVisionRegion = (string)dropdownCustomVisionRegion.SelectedValue;
+
+        }
+
+        private void TextCustomVisionProjectID_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            settings.CustomVisionProjectId = textCustomVisionProjectID.Text;
+        }
+
+        private void TextCustomVisionIterationName_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            settings.CustomVisionIterationName = textCustomVisionIterationName.Text;
+        }
+
+        private void Slider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        {
+            settings.CustomVisionThreshold = (int)sliderCustomVision.Value;
+        }
+
+        private void ToggleFaceDetect_Toggled(object sender, RoutedEventArgs e)
+        {
+            settings.DoFaceDetection = toggleFaceDetect.IsOn;
+        }
+
+        private void SliderFaceDetect_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        {
+            settings.FaceThreshold = (int)sliderFaceDetect.Value;
         }
     }
 }
