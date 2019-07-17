@@ -147,7 +147,7 @@ namespace MTCSTLKiosk.Controls
                             if (face.FaceAttributes.Hair.HairColor.Count > 0)
                                 hair = face.FaceAttributes.Hair.HairColor.First().Color.ToString();
                         }
-                        string userInfo = $"{i + 1} \nEmotion: {choosenEmotion} \nGlasses: {face.FaceAttributes.Glasses.ToString()} \nSmile: {face.FaceAttributes.Smile.ToString()} \nHair: {hair} ";
+                        string userInfo = $"Emotion: {choosenEmotion} \nGlasses: {face.FaceAttributes.Glasses.ToString()} \nSmile: {face.FaceAttributes.Smile.ToString()} \nHair: {hair} ";
 
                         AgeControl ageControl = null;
 
