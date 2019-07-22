@@ -510,7 +510,7 @@ namespace MTCSTLKiosk
                                 var results = await faceClient.Face.IdentifyWithHttpMessagesAsync(analysisFace.Body.Select(x => x.FaceId.Value).ToArray(), group.PersonGroupId);
                                 foreach (var identifyResult in results.Body)
                                 {
-                                    var cand = identifyResult.Candidates.FirstOrDefault(x => x.Confidence > .4);
+                                    var cand = identifyResult.Candidates.FirstOrDefault(x => x.Confidence > .6);
                                     if (cand == null)
                                     {
                                         Console.WriteLine("No one identified");
