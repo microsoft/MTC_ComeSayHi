@@ -79,7 +79,7 @@
                 </StackPanel>
                 <StackPanel Margin="0,10,0,0">
                     <TextBlock Text="Custom Vision Threshold" Margin="5" ></TextBlock>
-                    <Slider x:Name="sliderCustomVision" Width="200" HorizontalAlignment="Left" Maximum="100" Value="80" ValueChanged="Slider_ValueChanged"/>
+                    <Slider x:Name="sliderCustomVision" Width="200" HorizontalAlignment="Left" Maximum="100"  ValueChanged="Slider_ValueChanged"/>
 
                 </StackPanel>
                 <StackPanel Margin="0,10,0,0">
@@ -116,7 +116,7 @@
                     </StackPanel>
                     <StackPanel Margin="0,10,0,0">
                         <TextBlock Text="Face Detect Threshold" Margin="5" ></TextBlock>
-                        <Slider x:Name="sliderFaceDetect" Width="200" HorizontalAlignment="Left" Maximum="100" Value="80" ValueChanged="SliderFaceDetect_ValueChanged"/>
+                        <Slider x:Name="sliderFaceDetect" Width="200" HorizontalAlignment="Left" Maximum="100" ValueChanged="SliderFaceDetect_ValueChanged"/>
 
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">

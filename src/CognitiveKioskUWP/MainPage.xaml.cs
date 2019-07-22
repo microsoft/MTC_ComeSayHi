@@ -56,7 +56,7 @@ namespace MTCSTLKiosk
             DisableUI();
             timerFace = new DispatcherTimer();
             timerFace.Tick += TimerFace_Tick;
-            timerFace.Interval = new TimeSpan(0, 0, 2);
+            timerFace.Interval = new TimeSpan(0, 0, 0, 500);
             timerTakePicture = new DispatcherTimer();
             timerTakePicture.Tick += TimerTakePicture_Tick;
             timerTakePicture.Interval = new TimeSpan(0, 0, 0, 1, 0);

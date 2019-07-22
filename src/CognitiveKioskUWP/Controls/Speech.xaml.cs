@@ -44,8 +44,8 @@ namespace MTCSTLKiosk.Controls
 
             if (!string.IsNullOrEmpty(mainEvent.PrimarySpeechMessageFinal))
             {
-                textTranslationOriginal.Text = mainEvent.PrimarySpeechMessageFinal + "\n\n" + textTranslationOriginal.Text;
-                textTranslation.Text = mainEvent.SecondarySpeechMessageFinal + "\n\n" + textTranslation.Text;
+                textTranslationOriginal.Text = mainEvent.PrimarySpeechMessageFinal;
+                textTranslation.Text = mainEvent.SecondarySpeechMessageFinal;
             }
         }
     }

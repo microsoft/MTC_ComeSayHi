@@ -14,20 +14,19 @@
         <Grid x:Name="borderTranslation" VerticalAlignment="Stretch" Margin="20">
             <Grid.RowDefinitions>
                 <RowDefinition Height=".5*"/>
-                <RowDefinition Height=".5*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width=".7*"/>
-                <ColumnDefinition Width=".3*"/>
+                <ColumnDefinition Width=".5*"/>
+                <ColumnDefinition Width=".5*"/>
             </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="1" Background="#996E6E6E">
-                <TextBlock x:Name="textTranslationOriginalRT" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="16" TextAlignment="Left" Foreground="White"/>
-                <TextBlock x:Name="textTranslationOriginal" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="12" TextAlignment="Left" Margin="0,10,0,0" Foreground="White"/>
+            <StackPanel Grid.Column="0" Grid.Row="1" Background="#827FBA00">
+                <TextBlock x:Name="textTranslationOriginalRT" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="26" TextAlignment="Left" Foreground="White" Margin="0,0,5,0"/>
+                <TextBlock x:Name="textTranslationOriginal" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="15" TextAlignment="Left" Margin="0,10,5,0" Foreground="White"/>
             </StackPanel>
-            <StackPanel Grid.Column="1" Background="#996E6E6E" Grid.Row="1">
-                <Rectangle Fill="White" Height="1" ></Rectangle>
-                <TextBlock x:Name="textTranslationRT" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="16" TextAlignment="Left" Foreground="White"  />
-                <TextBlock x:Name="textTranslation" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="12" TextAlignment="Left" Foreground="White" Margin="0,10,0,0" />
+            <StackPanel Grid.Column="1" Background="#827FBA00" Grid.Row="1">
+                <TextBlock x:Name="textTranslationRT" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="26" TextAlignment="Left" Foreground="White"  />
+                <TextBlock x:Name="textTranslation" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="15" TextAlignment="Left" Foreground="White" Margin="0,10,0,0" />
             </StackPanel>
         </Grid>
     </Grid>

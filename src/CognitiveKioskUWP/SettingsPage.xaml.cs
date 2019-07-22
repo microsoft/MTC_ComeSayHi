@@ -57,6 +57,7 @@ namespace MTCSTLKiosk
             sliderCustomVision.Value = settings.CustomVisionThreshold;
             sliderFaceDetect.Value = settings.FaceThreshold;
 
+
             dropdownRegion.SelectedValue = settings.SpeechRegion;
             dropdownVisionRegion.SelectedValue = settings.VisionRegion;
             dropdownFaceRegion.SelectedValue = settings.FaceRegion;

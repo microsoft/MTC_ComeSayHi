@@ -12,17 +12,17 @@
 
     <Grid x:Name="gridCaptureBottomRight" Background="Transparent">
         <CaptureElement x:Name="captureControl" Margin="20" Stretch="UniformToFill" IsHitTestVisible="False"/>
-        <Border VerticalAlignment="Top" Background="#82F25022" Margin="20">
+        <Border VerticalAlignment="Top" Background="#82FFB900" Margin="20">
             <TextBlock x:Name="textFaceTotal"  HorizontalAlignment="Stretch" Margin="5" Text="Smile!" TextWrapping="Wrap" FontSize="20" TextAlignment="Center" Foreground="White" />
         </Border>
-        <Border VerticalAlignment="Bottom" Background="#82F25022" Margin="20">
+        <Border VerticalAlignment="Bottom" Background="#82FFB900" Margin="20">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width=".5*"/>
                     <ColumnDefinition Width=".5*"/>
                     <ColumnDefinition Width=".5*"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock x:Name="textFaces1" Grid.Column="0" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="18" TextAlignment="Left" Foreground="White" FocusVisualMargin="2,0,0,0" Margin="5,0,0,0"/>
+                <TextBlock x:Name="textFaces1" Grid.Column="0" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="15" TextAlignment="Left" Foreground="White" FocusVisualMargin="2,0,0,0" Margin="5,0,0,0"/>
                 <TextBlock x:Name="textFaces2" Grid.Column="1" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="15" TextAlignment="Left" Foreground="White"/>
                 <TextBlock x:Name="textFaces3" Grid.Column="2" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="15" TextAlignment="Left" Foreground="White"/>
             </Grid>

@@ -87,13 +87,13 @@ namespace MTCSTLKiosk.Controls
                         ageControl3.Visibility = Visibility.Collapsed;
 
                     }
-                    var facesSorted = faces.OrderBy(x => x.FaceRectangle.Left);
+                    var facesSorted = faces.Take(3).OrderBy(x => x.FaceRectangle.Left).ToList();
                     for (int i = 0; i < facesSorted.Count(); i++)
                     {
-                        var face = faces[i];
+                        var face = facesSorted[i];
 
-                        int convertedTop = ((face.FaceRectangle.Top * (int)captureControl.ActualHeight) / mainEvent.ImageHeight) - ((int)captureControl.Margin.Top) - ((int)ageControl1.ActualHeight * 2);
-                        int convertedLeft = ((face.FaceRectangle.Left * (int)captureControl.ActualWidth) / mainEvent.ImageWidth);
+                        int convertedTop = ((face.FaceRectangle.Top * (int)captureControl.ActualHeight) / mainEvent.ImageHeight) - ((int)captureControl.Margin.Top) - ((int)ageControl1.ActualHeight);
+                        int convertedLeft = (((face.FaceRectangle.Left + (face.FaceRectangle.Width/3)) * (int)captureControl.ActualWidth) / mainEvent.ImageWidth);
 
                         double maxEmotion = face.FaceAttributes.Emotion.Anger;
                         string choosenEmotion = "Anger";
