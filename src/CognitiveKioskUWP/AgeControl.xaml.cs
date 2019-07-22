@@ -41,12 +41,20 @@ namespace MTCSTLKiosk
 
             if (settings.ShowAgeAndGender)
             {
-                textUser.Text = number.ToString() + ": " + sex + " (" + age.ToString() + ")";
+                gridEmoji.Visibility = Visibility.Collapsed;
+                gridAgeIncluded.Visibility = Visibility.Visible;
+
+                this.Height = 25;
+                this.Width = 120;
+
+                textUser.Text = sex + " (" + age.ToString() + ")";
             }
             else
             {
-                textUser.Text = number.ToString();
-                textUser.Text += " " + emotion;
+                gridAgeIncluded.Visibility = Visibility.Collapsed;
+                gridEmoji.Visibility = Visibility.Visible;
+
+                textUser.Text = emotion;
             }
 
             if (emotion == "Anger")
@@ -81,6 +89,8 @@ namespace MTCSTLKiosk
             {
                 textSymbol.Text = emojiSuprise;
             }
+
+            textSymbol2.Text = textSymbol.Text;
 
         }
     }

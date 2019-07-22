@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
+using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,7 @@ namespace MTCSTLKiosk
     public class CognitiveEvent
     {
         public ImageAnalysis ImageAnalysis { get; set; }
+        public ImagePrediction ImageAnalysisCV { get; set; }
         public bool ClearData = false;
 
         public string PrimarySpeechMessage { get; set; }
@@ -23,5 +25,6 @@ namespace MTCSTLKiosk
         public int ImageWidth { get; set; }
 
         public Microsoft.Azure.CognitiveServices.Vision.Face.Models.Person IdentifiedPerson { get; set; }
+        public double IdentifiedPersonPrediction { get; set; }
     }
 }

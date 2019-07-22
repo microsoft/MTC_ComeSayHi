@@ -23,6 +23,7 @@
                     Style="{StaticResource TitleTextBlockStyle}"
                     Margin="0,40,0,0"
                     FontWeight="Normal"/>
+                <Button x:Name="buttonClose2" Content="Save &amp;  Close" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="20,20,20,20" Click="buttonClose_Click"/>
                 <TextBlock Text="Cognitive Services Settings (Obtain keys from an Azure Subscription)" 
                     Style="{StaticResource TitleTextBlockStyle}"
                     Margin="0,40,0,0"
@@ -59,6 +60,29 @@
                         </ComboBox>
                 </StackPanel>
                 <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Custom Vision API Key (customvision.ai)" Margin="5" ></TextBlock>
+                    <TextBox x:Name="textCustomVisionAPIKey" Text="" Margin="5" Width="400px" HorizontalAlignment="Left" TextChanged="TextCustomVisionAPIKey_TextChanged" />
+                </StackPanel>
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Custom Vision Region"   Margin="5"></TextBlock>
+                    <ComboBox x:Name="dropdownCustomVisionRegion"  Margin="5" SelectionChanged="DropdownCustomVisionRegion_SelectionChanged" >
+                        <ComboBoxItem Content="east"></ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Custom Vision Project ID (customvision.ai in URL)" Margin="5" ></TextBlock>
+                    <TextBox x:Name="textCustomVisionProjectID" Text="" Margin="5" Width="400px"  HorizontalAlignment="Left" TextChanged="TextCustomVisionProjectID_TextChanged" />
+                </StackPanel>
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Custom Vision Iteration Name (customvision.ai 'Pusblished As')" Margin="5" ></TextBlock>
+                    <TextBox x:Name="textCustomVisionIterationName" Text="" Margin="5" Width="400px"  HorizontalAlignment="Left" TextChanged="TextCustomVisionIterationName_TextChanged" />
+                </StackPanel>
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Custom Vision Threshold" Margin="5" ></TextBlock>
+                    <Slider x:Name="sliderCustomVision" Width="200" HorizontalAlignment="Left" Maximum="100" Value="80" ValueChanged="Slider_ValueChanged"/>
+
+                </StackPanel>
+                <StackPanel Margin="0,10,0,0">
                     <TextBlock Text="Show age and gender (WARNING this is not recommended due to current MS policy)" Margin="5" ></TextBlock>
                     <ToggleSwitch x:Name="toggleShowAge"  Margin="5" Toggled="ToggleShowAge_Toggled" />
                 </StackPanel>
@@ -86,6 +110,15 @@
                 </StackPanel>
                 <StackPanel Margin="0,10,0,0">
                     <TextBlock Text="Faces" Margin="5" ></TextBlock>
+                    <StackPanel Margin="0,10,0,0">
+                        <TextBlock Text="Do Face Detection" Margin="5" ></TextBlock>
+                        <ToggleSwitch x:Name="toggleFaceDetect"  Margin="5" Toggled="ToggleFaceDetect_Toggled"  />
+                    </StackPanel>
+                    <StackPanel Margin="0,10,0,0">
+                        <TextBlock Text="Face Detect Threshold" Margin="5" ></TextBlock>
+                        <Slider x:Name="sliderFaceDetect" Width="200" HorizontalAlignment="Left" Maximum="100" Value="80" ValueChanged="SliderFaceDetect_ValueChanged"/>
+
+                    </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <ComboBox x:Name="dropdownPerson"  Margin="5" SelectionChanged="DropdownPerson_SelectionChanged"  >
                             <ComboBoxItem Content="east"></ComboBoxItem>
