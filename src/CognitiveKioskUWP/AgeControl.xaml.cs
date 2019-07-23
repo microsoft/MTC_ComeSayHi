@@ -36,7 +36,7 @@ namespace MTCSTLKiosk
         private string emojiNeutral = char.ConvertFromUtf32(0x1f610);
         private string emojiSuprise = char.ConvertFromUtf32(0x1f62e);
 
-        public void SetUserInfo(int number, string sex, double? age, string  emotion)
+        public void SetUserInfo(int number, string sex, double? age, string  emotion, Guid? faceId)
         {
 
             if (settings.ShowAgeAndGender)

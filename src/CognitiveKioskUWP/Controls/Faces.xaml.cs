@@ -21,6 +21,7 @@ namespace MTCSTLKiosk.Controls
     public sealed partial class Faces : UserControl, IQuarterControl
     {
         private Settings settings;
+        private System.Collections.Generic.IList<Microsoft.Azure.CognitiveServices.Vision.Face.Models.DetectedFace> lastFaces = null;
         public Faces()
         {
             this.InitializeComponent();
@@ -29,9 +30,57 @@ namespace MTCSTLKiosk.Controls
 
         public CaptureElement MainCapture { get { return captureControl; } }
 
+        public void UpdateFaceLocation(IReadOnlyList<Windows.Media.FaceAnalysis.DetectedFace> detectedFaces, int imageHeight, int imageWidth)
+        {
+            if (lastFaces == null)
+                return; 
+            var localFaces = detectedFaces.OrderByDescending(x => x.FaceBox.Width).Take(3).OrderBy(x => x.FaceBox.X);
+            int margin = (int)(imageWidth * .05) ;
+            for (int i = 0; i < localFaces.Count(); i++)
+            {
+                var localFace = localFaces.ElementAt(i);
+                for (int j = 0; j < lastFaces.Count; j++)
+                {
+                    var lastFace = lastFaces[j];
+                    if ((lastFace.FaceRectangle.Top + margin > localFace.FaceBox.Y && localFace.FaceBox.Y > lastFace.FaceRectangle.Top - margin)
+                        && (lastFace.FaceRectangle.Left + margin > localFace.FaceBox.X && localFace.FaceBox.X > lastFace.FaceRectangle.Left - margin))
+                    {
+                        lastFace.FaceRectangle.Top = (int)localFace.FaceBox.Y;
+                        lastFace.FaceRectangle.Left = (int)localFace.FaceBox.X;
+                        int convertedTop = 0;
+                        int convertedLeft = 0;
+
+                        if (localFaces.Count() > i && imageHeight > 0 && imageWidth > 0)
+                        {
+                            convertedTop = (((int)localFace.FaceBox.Y * (int)captureControl.ActualHeight) / imageHeight) - ((int)captureControl.Margin.Top) - ((int)ageControl1.ActualHeight);
+                            convertedLeft = ((((int)localFace.FaceBox.X + ((int)localFace.FaceBox.Width / 3)) * (int)captureControl.ActualWidth) / imageWidth);
+                        }
+                        AgeControl ageControl = null;
+
+                        switch (j)
+                        {
+                            case 0:
+                                ageControl = ageControl1;
+                                break;
+                            case 1:
+                                ageControl = ageControl2;
+                                break;
+                            case 2:
+                                ageControl = ageControl3;
+                                break;
+                        }
+
+                        if (ageControl == null)
+                            break;
+                        ageControl.Margin = new Thickness(convertedLeft, convertedTop, 0, 0);
+                    }
+                }
+            }
+        }
         public void UpdateEvent(CognitiveEvent mainEvent)
         {
-            var faces = mainEvent.Faces;
+            lastFaces = mainEvent.Faces.Take(3).OrderBy(x => x.FaceRectangle.Left).ToList();
+            var faces = lastFaces;
 
             try
             {
@@ -87,13 +136,14 @@ namespace MTCSTLKiosk.Controls
                         ageControl3.Visibility = Visibility.Collapsed;
 
                     }
-                    var facesSorted = faces.Take(3).OrderBy(x => x.FaceRectangle.Left).ToList();
-                    for (int i = 0; i < facesSorted.Count(); i++)
+                    for (int i = 0; i < faces.Count(); i++)
                     {
-                        var face = facesSorted[i];
-
+                        var face = faces[i];
+                        
                         int convertedTop = ((face.FaceRectangle.Top * (int)captureControl.ActualHeight) / mainEvent.ImageHeight) - ((int)captureControl.Margin.Top) - ((int)ageControl1.ActualHeight);
                         int convertedLeft = (((face.FaceRectangle.Left + (face.FaceRectangle.Width/3)) * (int)captureControl.ActualWidth) / mainEvent.ImageWidth);
+
+                      
 
                         double maxEmotion = face.FaceAttributes.Emotion.Anger;
                         string choosenEmotion = "Anger";
@@ -170,9 +220,9 @@ namespace MTCSTLKiosk.Controls
                         if (ageControl == null)
                             break;
 
-                        ageControl.Margin = new Thickness(convertedLeft, convertedTop, 0, 0);
+                        //ageControl.Margin = new Thickness(convertedLeft, convertedTop, 0, 0);
                         ageControl.Visibility = Visibility;
-                        ageControl.SetUserInfo(i + 1, face.FaceAttributes.Gender.ToString(), face.FaceAttributes.Age, choosenEmotion);
+                        ageControl.SetUserInfo(i + 1, face.FaceAttributes.Gender.ToString(), face.FaceAttributes.Age, choosenEmotion, face.FaceId);
 
                     }
                 });

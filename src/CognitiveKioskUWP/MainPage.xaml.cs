@@ -45,6 +45,9 @@ namespace MTCSTLKiosk
     public sealed partial class MainPage : Page
     {
         private Settings settings;
+        private IReadOnlyList<Windows.Media.FaceAnalysis.DetectedFace> detectedFaces = null;
+        private int imageWidth = 0;
+        private int imageHeight = 0;
 
         public MainPage()
         {
@@ -227,6 +230,7 @@ namespace MTCSTLKiosk
             {
                 try
                 {
+
                     if (!isFaceFound || DateTime.Now.Subtract(faceLastDate).TotalMinutes > 5)
                     {
                         Analytics.TrackEvent("Faces found, starting capture");
@@ -239,6 +243,13 @@ namespace MTCSTLKiosk
                         });
                     }
                     faceLastDate = DateTime.Now;
+
+                    detectedFaces = args.ResultFrame.DetectedFaces.ToList();
+
+                    await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
+                    {
+                        facesControl.UpdateFaceLocation(detectedFaces, imageHeight, imageWidth);
+                    });
 
                 }
                 catch (Exception)
@@ -525,8 +536,10 @@ namespace MTCSTLKiosk
                         encoder.SetSoftwareBitmap(image);
                         await encoder.FlushAsync();
 
-                        var analysisFace = await faceClient.Face.DetectWithStreamWithHttpMessagesAsync(ms.AsStream(), returnFaceAttributes: faceAttributes);
-                        facesControl.UpdateEvent(new CognitiveEvent() { Faces = analysisFace.Body, ImageWidth = image.PixelWidth, ImageHeight = image.PixelHeight });
+                        var analysisFace = await faceClient.Face.DetectWithStreamWithHttpMessagesAsync(ms.AsStream(), returnFaceId: true, returnFaceAttributes: faceAttributes) ;
+                        imageWidth = image.PixelWidth;
+                        imageHeight = image.PixelHeight;
+                        facesControl.UpdateEvent(new CognitiveEvent() { Faces = analysisFace.Body, ImageWidth = image.PixelWidth, ImageHeight = image.PixelHeight, DetectedFaces = detectedFaces });
 
                         if (analysisFace.Body.Count() > 0 && settings.DoFaceDetection)
                         {

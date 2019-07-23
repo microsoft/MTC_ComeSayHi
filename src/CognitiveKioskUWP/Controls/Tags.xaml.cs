@@ -23,12 +23,11 @@ namespace MTCSTLKiosk.Controls
     {
         List<Person> people = new List<Person>();
         DateTime lastRefresh = DateTime.Now.AddDays(-1);
-        private Settings settings;
+        private Settings settings = Settings.SingletonInstance;
 
         public Tags()
         {
             this.InitializeComponent();
-            settings = Settings.SingletonInstance;
         }
 
         public CaptureElement MainCapture { get { return captureControl; } }
@@ -47,11 +46,10 @@ namespace MTCSTLKiosk.Controls
                 {
                     textTags.Text = "Pretrained: ";
                     textTags.Text += string.Join(",", mainEvent.ImageAnalysis.Tags.Select(x => x.Name));
-                    if(mainEvent.ImageAnalysisCV != null && mainEvent.ImageAnalysisCV.Predictions != null)
+
+                    if (mainEvent.ImageAnalysis.Brands != null && mainEvent.ImageAnalysis.Brands.Count > 0)
                     {
-                        var preds = mainEvent.ImageAnalysisCV.Predictions.Where(x => x.Probability >= settings.CustomVisionThreshold / 100d);
-                        if(preds.Count() > 0)
-                            textTags.Text += "\n\nCustom Vision: " + string.Join(",", preds.Select(x => x.TagName).Distinct());
+                        textTags.Text += "\n\n" + mainEvent.ImageAnalysis.Brands.First().Name + " Logo";
                     }
                 }
 
