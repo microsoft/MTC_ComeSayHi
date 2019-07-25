@@ -13,7 +13,7 @@
 
         </Grid>
         <Grid x:Name="gridEmoji" >
-            <TextBlock x:Name="textSymbol2" Text="&#x1F622;"  VerticalAlignment="Center"  FocusVisualPrimaryBrush="#737373" Foreground="White" FontSize="48" FontWeight="Bold" FontFamily="Segoe UI Emoji" Margin="0,0,5,0" IsColorFontEnabled="True"/>
+            <TextBlock x:Name="textSymbol2" Text="&#x1F622;"  VerticalAlignment="Center"  FocusVisualPrimaryBrush="#737373" Foreground="White" FontSize="60" FontWeight="Bold" FontFamily="Segoe UI Emoji" Margin="0,0,5,0" IsColorFontEnabled="True"/>
 
         </Grid>
     </Grid>

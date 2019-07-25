@@ -23,6 +23,7 @@ using Windows.Media;
 using Windows.Media.Capture;
 using Windows.Media.Core;
 using Windows.Media.MediaProperties;
+using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.System.Display;
 using Windows.UI.Core;
@@ -45,7 +46,6 @@ namespace MTCSTLKiosk
     public sealed partial class MainPage : Page
     {
         private Settings settings;
-        private IReadOnlyList<Windows.Media.FaceAnalysis.DetectedFace> detectedFaces = null;
         private int imageWidth = 0;
         private int imageHeight = 0;
 
@@ -59,10 +59,10 @@ namespace MTCSTLKiosk
             DisableUI();
             timerFace = new DispatcherTimer();
             timerFace.Tick += TimerFace_Tick;
-            timerFace.Interval = new TimeSpan(0, 0, 0, 500);
+            timerFace.Interval = new TimeSpan(0, 0, 2, 0);
             timerTakePicture = new DispatcherTimer();
             timerTakePicture.Tick += TimerTakePicture_Tick;
-            timerTakePicture.Interval = new TimeSpan(0, 0, 0, 1, 0);
+            timerTakePicture.Interval = new TimeSpan(0, 0, 0, 0, 500);
             timerFailsafe = new DispatcherTimer();
             timerFailsafe.Tick += TimerFailsafe_Tick;
             timerFailsafe.Interval = new TimeSpan(0, 0, 10, 0, 0);
@@ -71,6 +71,9 @@ namespace MTCSTLKiosk
             await StartPreviewAsync();
             InfoFadeOut.Begin();
         }
+        bool loopWorking = true;
+
+
 
         private async void TimerFailsafe_Tick(object sender, object e)
         {
@@ -82,7 +85,7 @@ namespace MTCSTLKiosk
                 
             }
         }
-
+        DateTime proc = DateTime.Now;
         private async void TimerTakePicture_Tick(object sender, object e)
         {
             try
@@ -186,6 +189,7 @@ namespace MTCSTLKiosk
 
                 // In this scenario, choose detection speed over accuracy
                 definition.DetectionMode = FaceDetectionMode.HighPerformance;
+                imageAnalysisRunning = false;
 
                 // Add the effect to the preview stream
                 _faceDetectionEffect = (FaceDetectionEffect)await mediaCapture.AddVideoEffectAsync(definition, MediaStreamType.VideoPreview);
@@ -243,13 +247,7 @@ namespace MTCSTLKiosk
                         });
                     }
                     faceLastDate = DateTime.Now;
-
-                    detectedFaces = args.ResultFrame.DetectedFaces.ToList();
-
-                    await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
-                    {
-                        facesControl.UpdateFaceLocation(detectedFaces, imageHeight, imageWidth);
-                    });
+                                                        
 
                 }
                 catch (Exception)
@@ -324,7 +322,7 @@ namespace MTCSTLKiosk
                     {
                         try
                         {
-                            Debug.WriteLine($"Message received {e.Result.Text}");
+                            //Debug.WriteLine($"Message received {e.Result.Text}");
                             string languageLong = textLanguges[e.Result.Translations.First().Key];
                             UpdateTranslationUI($"English: {e.Result.Text}", $"{languageLong}: {e.Result.Translations.First().Value}");
 
@@ -337,7 +335,7 @@ namespace MTCSTLKiosk
 
                     recognizer.Recognized += (s, e) =>
                     {
-                        Debug.WriteLine($"Message received {e.Result.Text}");
+                        //Debug.WriteLine($"Message received {e.Result.Text}");
                         if (e.Result.Translations.Count() > 0)
                         {
                             string languageLong = textLanguges[e.Result.Translations.FirstOrDefault().Key];
@@ -443,6 +441,24 @@ namespace MTCSTLKiosk
                 VideoFrame previewFrame = await mediaCapture.GetPreviewFrameAsync(videoFrame);
 
                 savedImage = previewFrame.SoftwareBitmap;
+                bool bear = false;
+                if (bear)
+                {
+                    StorageFile tempFile = await ApplicationData.Current.TemporaryFolder.CreateFileAsync(
+                                                        "FaceRecoCameraCapture.png",
+                                                        CreationCollisionOption.GenerateUniqueName);
+                    if (savedImage != null)
+                    {
+                        // save image file to cache
+
+                        using (IRandomAccessStream stream = await tempFile.OpenAsync(FileAccessMode.ReadWrite))
+                        {
+                            BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, stream);
+                            encoder.SetSoftwareBitmap(savedImage);
+                            await encoder.FlushAsync();
+                        }
+                    }
+                }
 
                 previewFrame.Dispose();
                 previewFrame = null;
@@ -456,11 +472,31 @@ namespace MTCSTLKiosk
             }
             return null;
         }
+        bool imageAnalysisRunning = false;
 
         private async Task ProcessImage(SoftwareBitmap image)
         {
             try
             {
+                Func<Task<Stream>> imageStreamCallback;
+
+                using (InMemoryRandomAccessStream stream = new InMemoryRandomAccessStream())
+                {
+                    BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, stream);
+                    encoder.SetSoftwareBitmap(image);
+                    await encoder.FlushAsync();
+
+                    // Read the pixel bytes from the memory stream
+                    using (var reader = new DataReader(stream.GetInputStreamAt(0)))
+                    {
+                        var bytes = new byte[stream.Size];
+                        await reader.LoadAsync((uint)stream.Size);
+                        reader.ReadBytes(bytes);
+                        imageStreamCallback = () => Task.FromResult<Stream>(new MemoryStream(bytes));
+                    }
+                }
+
+            
                 Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ComputerVisionClient visionClient = new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ComputerVisionClient(
                     new ApiKeyServiceClientCredentials(settings.VisionKey),
                     new System.Net.Http.DelegatingHandler[] { });
@@ -497,76 +533,66 @@ namespace MTCSTLKiosk
 
                 try
                 {
-                    if (DateTime.Now.Subtract(imageAnalysisLastDate).TotalSeconds > 1)
+                    if (!imageAnalysisRunning && DateTime.Now.Subtract(imageAnalysisLastDate).TotalMilliseconds > 1000)
                     {
-                        using (var msVision = new InMemoryRandomAccessStream())
-                        {
-                            BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, msVision);
-                            encoder.SetSoftwareBitmap(image);
-                            await encoder.FlushAsync();
+                        imageAnalysisRunning = true;
 
-                            var analysis = await visionClient.AnalyzeImageInStreamAsync(msVision.AsStream(), features);
+                        _ = Task.Run(async () =>
+                        {
+                            ImageAnalysis analysis = await visionClient.AnalyzeImageInStreamAsync(await imageStreamCallback(), features);
                             ImagePrediction analysisCV = null;
 
-                            using (var msCustomVision = new InMemoryRandomAccessStream())
+                            try
                             {
-                                 encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, msCustomVision);
-                                encoder.SetSoftwareBitmap(image);
-                                await encoder.FlushAsync();
-                                try
-                                {
-                                    analysisCV = await customVisionClient.DetectImageWithNoStoreAsync(new Guid(settings.CustomVisionProjectId), settings.CustomVisionIterationName, msCustomVision.AsStream());
+                                analysisCV = await customVisionClient.DetectImageWithNoStoreAsync(new Guid(settings.CustomVisionProjectId), settings.CustomVisionIterationName, await imageStreamCallback());
 
-                                }
-                                catch (Exception)
-                                {
-                                    // Throw away error
-                                }
+                            }
+                            catch (Exception)
+                            {
+                                // Throw away error
                             }
 
+
                             UpdateWithAnalysis(analysis, analysisCV);
-                        }
-                        imageAnalysisLastDate = DateTime.Now;
+
+                            imageAnalysisLastDate = DateTime.Now;
+                            imageAnalysisRunning = false;
+                        });
                     }
 
 
-                    using (var ms = new InMemoryRandomAccessStream())
+
+                    var analysisFace = await faceClient.Face.DetectWithStreamWithHttpMessagesAsync(await imageStreamCallback(), returnFaceId: true, returnFaceAttributes: faceAttributes);
+                    imageWidth = image.PixelWidth;
+                    imageHeight = image.PixelHeight;
+                    facesControl.UpdateEvent(new CognitiveEvent() { Faces = analysisFace.Body, ImageWidth = image.PixelWidth, ImageHeight = image.PixelHeight });
+
+                    if (analysisFace.Body.Count() > 0 && settings.DoFaceDetection)
                     {
-                        BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, ms);
-                        encoder.SetSoftwareBitmap(image);
-                        await encoder.FlushAsync();
-
-                        var analysisFace = await faceClient.Face.DetectWithStreamWithHttpMessagesAsync(ms.AsStream(), returnFaceId: true, returnFaceAttributes: faceAttributes) ;
-                        imageWidth = image.PixelWidth;
-                        imageHeight = image.PixelHeight;
-                        facesControl.UpdateEvent(new CognitiveEvent() { Faces = analysisFace.Body, ImageWidth = image.PixelWidth, ImageHeight = image.PixelHeight, DetectedFaces = detectedFaces });
-
-                        if (analysisFace.Body.Count() > 0 && settings.DoFaceDetection)
+                        var groups = await faceClient.PersonGroup.ListWithHttpMessagesAsync();
+                        var group = groups.Body.FirstOrDefault(x => x.Name == settings.GroupName);
+                        if (group != null)
                         {
-                            var groups = await faceClient.PersonGroup.ListWithHttpMessagesAsync();
-                            var group = groups.Body.FirstOrDefault(x => x.Name == settings.GroupName);
-                            if (group != null)
+                            var results = await faceClient.Face.IdentifyWithHttpMessagesAsync(analysisFace.Body.Select(x => x.FaceId.Value).ToArray(), group.PersonGroupId);
+                            foreach (var identifyResult in results.Body)
                             {
-                                var results = await faceClient.Face.IdentifyWithHttpMessagesAsync(analysisFace.Body.Select(x => x.FaceId.Value).ToArray(), group.PersonGroupId);
-                                foreach (var identifyResult in results.Body)
+                                var cand = identifyResult.Candidates.FirstOrDefault(x => x.Confidence > settings.FaceThreshold / 100d);
+                                if (cand == null)
                                 {
-                                    var cand = identifyResult.Candidates.FirstOrDefault(x => x.Confidence > settings.FaceThreshold / 100d);
-                                    if (cand == null)
-                                    {
-                                        Console.WriteLine("No one identified");
-                                    }
-                                    else
-                                    {
-                                        // Get top 1 among all candidates returned
-                                        var candidateId = cand.PersonId;
-                                        var person = await faceClient.PersonGroupPerson.GetWithHttpMessagesAsync(group.PersonGroupId, candidateId);
+                                    Console.WriteLine("No one identified");
+                                }
+                                else
+                                {
+                                    // Get top 1 among all candidates returned
+                                    var candidateId = cand.PersonId;
+                                    var person = await faceClient.PersonGroupPerson.GetWithHttpMessagesAsync(group.PersonGroupId, candidateId);
                                         tagsControl.UpdateEvent(new CognitiveEvent() { IdentifiedPerson = person.Body, IdentifiedPersonPrediction = cand.Confidence });
                                         Console.WriteLine("Identified as {0}", person.Body.Name);
                                     }
                                 }
                             }
                         }
-                    }
+                    
 
                 }
                 catch (Exception)
@@ -592,7 +618,7 @@ namespace MTCSTLKiosk
                 }
                 else
                 {
-                    var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis }); tagsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis }); });
+                    var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageAnalysisCV = analysisCV }); tagsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageAnalysisCV = analysisCV }); });
                 }
             }
             catch (Exception)
