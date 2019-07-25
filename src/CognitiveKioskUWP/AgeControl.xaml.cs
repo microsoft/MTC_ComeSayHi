@@ -20,26 +20,44 @@ namespace MTCSTLKiosk
 {
     public sealed partial class AgeControl : UserControl
     {
+        private Settings settings;
         public AgeControl()
         {
             this.InitializeComponent();
+            settings = Settings.SingletonInstance;
         }
 
         private string emojiSad = char.ConvertFromUtf32(0x1f62d);
-        private string emojiAnger = char.ConvertFromUtf32(0x1f620);
-        private string emojiContempt = char.ConvertFromUtf32(0x1f61e);
-        private string emojiDisgust = char.ConvertFromUtf32(0x1f615);
-        private string emojiFear = char.ConvertFromUtf32(0x1f616);
+        private string emojiAnger = char.ConvertFromUtf32(0x1f92c);
+        private string emojiContempt = char.ConvertFromUtf32(0x1f612);
+        private string emojiDisgust = char.ConvertFromUtf32(0x1f922);
+        private string emojiFear = char.ConvertFromUtf32(0x1f631);
         private string emojiHappiness = char.ConvertFromUtf32(0x1f600);
         private string emojiNeutral = char.ConvertFromUtf32(0x1f610);
-        private string emojiSuprise = char.ConvertFromUtf32(0x1f62e);
+        private string emojiSuprise = char.ConvertFromUtf32(0x1f632);
 
         public void SetUserInfo(int number, string sex, double? age, string  emotion)
         {
-          
-            textUser.Text = number.ToString() + ": " + sex + " (" + age.ToString() + ")";
 
-            if(emotion  == "Anger")
+            if (settings.ShowAgeAndGender)
+            {
+                gridEmoji.Visibility = Visibility.Collapsed;
+                gridAgeIncluded.Visibility = Visibility.Visible;
+
+                this.Height = 25;
+                this.Width = 120;
+
+                textUser.Text = sex + " (" + age.ToString() + ")";
+            }
+            else
+            {
+                gridAgeIncluded.Visibility = Visibility.Collapsed;
+                gridEmoji.Visibility = Visibility.Visible;
+
+                textUser.Text = emotion;
+            }
+
+            if (emotion == "Anger")
             {
                 textSymbol.Text = emojiAnger;
             }
@@ -71,6 +89,9 @@ namespace MTCSTLKiosk
             {
                 textSymbol.Text = emojiSuprise;
             }
+
+            textSymbol2.Text = textSymbol.Text;
+
         }
     }
 }

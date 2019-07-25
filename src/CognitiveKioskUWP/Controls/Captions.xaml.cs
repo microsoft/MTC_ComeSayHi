@@ -19,6 +19,7 @@ namespace MTCSTLKiosk.Controls
 {
     public sealed partial class Captions : UserControl, IQuarterControl
     {
+        private Settings settings = Settings.SingletonInstance;
         public Captions()
         {
             this.InitializeComponent();
@@ -28,9 +29,25 @@ namespace MTCSTLKiosk.Controls
 
         public void UpdateEvent(CognitiveEvent mainEvent)
         {
-            if (mainEvent.ImageAnalysis.Description.Captions.Count > 0)
+
+            if (mainEvent.ImageAnalysisCV == null || mainEvent.ImageAnalysisCV.Predictions == null)
             {
-                textDescription.Text = mainEvent.ImageAnalysis.Description.Captions.FirstOrDefault().Text;
+                if (mainEvent.ImageAnalysis.Description.Captions.Count > 0)
+                {
+                    textDescription.Text = mainEvent.ImageAnalysis.Description.Captions.FirstOrDefault().Text;
+                }
+            }
+            if (mainEvent.ImageAnalysisCV != null && mainEvent.ImageAnalysisCV.Predictions != null)
+            {
+                var preds = mainEvent.ImageAnalysisCV.Predictions.Where(x => x.Probability >= settings.CustomVisionThreshold / 100d);
+                if (preds.Count() > 0)
+                    textDescription.Text = "Custom Vision: " + string.Join(",", preds.Select(x => x.TagName).Distinct());
+                else if (mainEvent.ImageAnalysis.Description.Captions.Count > 0)
+                {
+                    textDescription.Text = mainEvent.ImageAnalysis.Description.Captions.FirstOrDefault().Text;
+                }
+                else
+                    textDescription.Text = "";
             }
         }
     }

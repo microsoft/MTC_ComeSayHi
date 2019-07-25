@@ -44,6 +44,30 @@ namespace MTCSTLKiosk
             set { localSettings.Values["CameraKey"] = value; }
         }
 
+        public bool ShowAgeAndGender
+        {
+            get
+            {
+                if (localSettings.Values.ContainsKey("ShowAgeAndGender"))
+                    return (bool)localSettings.Values["ShowAgeAndGender"];
+                else
+                    return false;
+            }
+            set { localSettings.Values["ShowAgeAndGender"] = value; }
+        }
+
+        public bool DoFaceDetection
+        {
+            get
+            {
+                if (localSettings.Values.ContainsKey("DoFaceDetection"))
+                    return (bool)localSettings.Values["DoFaceDetection"];
+                else
+                    return false;
+            }
+            set { localSettings.Values["DoFaceDetection"] = value; }
+        }
+
         public string SpeechKey
         {
             get {
@@ -53,6 +77,14 @@ namespace MTCSTLKiosk
                     return string.Empty;
             }
             set { localSettings.Values["SpeechKey"] = value; }
+        }
+
+        public string GroupName
+        {
+            get
+            {
+                return "MTC CSH FACES";
+            }
         }
 
         public string VisionKey
@@ -65,6 +97,66 @@ namespace MTCSTLKiosk
                     return string.Empty;
             }
             set { localSettings.Values["VisionKey"] = value; }
+        }
+
+        public string CustomVisionKey
+        {
+            get
+            {
+                if (localSettings.Values.ContainsKey("CustomVisionKey"))
+                    return (string)localSettings.Values["CustomVisionKey"];
+                else
+                    return string.Empty;
+            }
+            set { localSettings.Values["CustomVisionKey"] = value; }
+        }
+
+        public string CustomVisionProjectId
+        {
+            get
+            {
+                if (localSettings.Values.ContainsKey("CustomVisionProjectId"))
+                    return (string)localSettings.Values["CustomVisionProjectId"];
+                else
+                    return string.Empty;
+            }
+            set { localSettings.Values["CustomVisionProjectId"] = value; }
+        }
+
+        public string CustomVisionIterationName
+        {
+            get
+            {
+                if (localSettings.Values.ContainsKey("CustomVisionIterationName"))
+                    return (string)localSettings.Values["CustomVisionIterationName"];
+                else
+                    return string.Empty;
+            }
+            set { localSettings.Values["CustomVisionIterationName"] = value; }
+        }
+
+        public int CustomVisionThreshold
+        {
+            get
+            {
+                if (localSettings.Values.ContainsKey("CustomVisionThreshold"))
+                    return (int)localSettings.Values["CustomVisionThreshold"];
+                else
+                    return 80;
+            }
+            set { localSettings.Values["CustomVisionThreshold"] = value; }
+        }
+
+        public int FaceThreshold
+        {
+            get
+            {
+                if (localSettings.Values.ContainsKey("FaceThreshold"))
+                    return (int)localSettings.Values["FaceThreshold"];
+                else
+                    return 65;
+            }
+            set { localSettings.Values["FaceThreshold"] = value; }
         }
 
         public string FaceKey
@@ -101,6 +193,18 @@ namespace MTCSTLKiosk
                     return string.Empty;
             }
             set { localSettings.Values["VisionRegion"] = value; }
+        }
+
+        public string CustomVisionRegion
+        {
+            get
+            {
+                if (localSettings.Values.ContainsKey("CustomVisionRegion"))
+                    return (string)localSettings.Values["CustomVisionRegion"];
+                else
+                    return string.Empty;
+            }
+            set { localSettings.Values["CustomVisionRegion"] = value; }
         }
 
         public string SpeechRegion

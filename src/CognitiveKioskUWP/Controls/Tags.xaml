@@ -12,8 +12,15 @@
 
     <Grid x:Name="gridMain" Background="Transparent">
         <CaptureElement x:Name="captureControl" Margin="20" Stretch="UniformToFill" IsHitTestVisible="False"/>
-        <Border VerticalAlignment="Bottom" Background="#996E6E6E" Margin="20">
+        <Border VerticalAlignment="Top" Background="#996E6E6E" Margin="20" Name="borderTop" Visibility="Collapsed">
+            <StackPanel>
+                <TextBlock x:Name="textPeople" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="30" TextAlignment="Center" Foreground="White"/>
+            </StackPanel>
+        </Border>
+        <Border VerticalAlignment="Bottom" Background="#8200A4EF" Margin="20">
+            <StackPanel>
             <TextBlock x:Name="textTags" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="30" TextAlignment="Center" Foreground="White"/>
+            </StackPanel>
         </Border>
     </Grid>
 </UserControl>

@@ -6,71 +6,130 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" d:DesignWidth="1578"  d:DesignHeight="1578" >
 
     <Grid>
-        
-        <StackPanel Orientation="Vertical">
-            <TextBlock Text="Settings" TextWrapping="Wrap" FontSize="48" Margin="10"/>
-            <TextBlock Text="Cloud" TextWrapping="Wrap" FontSize="38" Margin="10"/>
-            <Grid Margin="10">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Speech API Key" TextAlignment="Center" VerticalAlignment="Center"></TextBlock>
-                    <TextBox x:Name="textSpeechAPIKey" Text="" Margin="20,0,0,0" Width="400px" TextChanged="textSpeechAPIKey_TextChanged" />
-                </StackPanel>
-            </Grid>
 
-            <Grid Margin="10">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Speech Region" TextAlignment="Center" VerticalAlignment="Center"></TextBlock>
-                    <ComboBox x:Name="dropdownRegion"  Margin="20,0,0,0" SelectionChanged="dropdownRegion_SelectionChanged">
+        <ScrollViewer
+            x:Name="contentSV"
+            Grid.Row="1"
+            Padding="20,0,0,0"
+            IsTabStop="False"
+            UseSystemFocusVisuals="False"
+            VerticalScrollBarVisibility="Auto"
+            VerticalScrollMode="Auto">
+            <StackPanel Orientation="Vertical">
+                <TextBlock x:Name="textSettings" Text="Settings" 
+                    Style="{StaticResource TitleTextBlockStyle}"
+                    Margin="0,40,0,0"
+                    FontWeight="Normal"/>
+                <Button x:Name="buttonClose2" Content="Save &amp;  Close" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="20,20,20,20" Click="buttonClose_Click"/>
+                <TextBlock Text="Cognitive Services Settings (Obtain keys from an Azure Subscription)" 
+                    Style="{StaticResource TitleTextBlockStyle}"
+                    Margin="0,40,0,0"
+                    FontWeight="Normal"/>
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Speech API Key" Margin="5"></TextBlock>
+                    <TextBox x:Name="textSpeechAPIKey" Text="" Margin="5"  Width="400px" TextChanged="textSpeechAPIKey_TextChanged" HorizontalAlignment="Left" />
+                </StackPanel>
+
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Speech Region" Margin="5"></TextBlock>
+                    <ComboBox x:Name="dropdownRegion"  Margin="5" SelectionChanged="dropdownRegion_SelectionChanged">
                         <ComboBoxItem Content="east"></ComboBoxItem>
                     </ComboBox>
                 </StackPanel>
-            </Grid>
-            <Grid Margin="10">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Vision API Key" TextAlignment="Center" VerticalAlignment="Center"></TextBlock>
-                    <TextBox x:Name="textVisionAPIKey" Text="" Margin="20,0,0,0" Width="400px" TextChanged="textVisionAPIKey_TextChanged" />
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Vision API Key"  Margin="5"></TextBlock>
+                    <TextBox x:Name="textVisionAPIKey" Text="" Margin="5" Width="400px" TextChanged="textVisionAPIKey_TextChanged" HorizontalAlignment="Left" />
                 </StackPanel>
-            </Grid>
-            <Grid Margin="10">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Vision Region" TextAlignment="Center" VerticalAlignment="Center"></TextBlock>
-                    <ComboBox x:Name="dropdownVisionRegion"  Margin="20,0,0,0" SelectionChanged="dropdownVisionRegion_SelectionChanged">
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Vision Region" Margin="5" ></TextBlock>
+                        <ComboBox x:Name="dropdownVisionRegion"  Margin="5" SelectionChanged="dropdownVisionRegion_SelectionChanged">
+                            <ComboBoxItem Content="east"></ComboBoxItem>
+                        </ComboBox>
+                </StackPanel>
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Face API Key" Margin="5" ></TextBlock>
+                    <TextBox x:Name="textFaceAPIKey" Text="" Margin="5" Width="400px" TextChanged="textFaceAPIKey_TextChanged" HorizontalAlignment="Left" />
+                </StackPanel>
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Face Region"   Margin="5"></TextBlock>
+                        <ComboBox x:Name="dropdownFaceRegion"  Margin="5" SelectionChanged="dropdownFaceRegion_SelectionChanged">
+                            <ComboBoxItem Content="east"></ComboBoxItem>
+                        </ComboBox>
+                </StackPanel>
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Custom Vision API Key (customvision.ai)" Margin="5" ></TextBlock>
+                    <TextBox x:Name="textCustomVisionAPIKey" Text="" Margin="5" Width="400px" HorizontalAlignment="Left" TextChanged="TextCustomVisionAPIKey_TextChanged" />
+                </StackPanel>
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Custom Vision Region"   Margin="5"></TextBlock>
+                    <ComboBox x:Name="dropdownCustomVisionRegion"  Margin="5" SelectionChanged="DropdownCustomVisionRegion_SelectionChanged" >
                         <ComboBoxItem Content="east"></ComboBoxItem>
                     </ComboBox>
                 </StackPanel>
-            </Grid>
-            <Grid Margin="10">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Face API Key" TextAlignment="Center" VerticalAlignment="Center"></TextBlock>
-                    <TextBox x:Name="textFaceAPIKey" Text="" Margin="20,0,0,0" Width="400px" TextChanged="textFaceAPIKey_TextChanged" />
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Custom Vision Project ID (customvision.ai in URL)" Margin="5" ></TextBlock>
+                    <TextBox x:Name="textCustomVisionProjectID" Text="" Margin="5" Width="400px"  HorizontalAlignment="Left" TextChanged="TextCustomVisionProjectID_TextChanged" />
                 </StackPanel>
-            </Grid>
-            <Grid Margin="10">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Face Region" TextAlignment="Center" VerticalAlignment="Center"></TextBlock>
-                    <ComboBox x:Name="dropdownFaceRegion"  Margin="20,0,0,0" SelectionChanged="dropdownFaceRegion_SelectionChanged">
-                        <ComboBoxItem Content="east"></ComboBoxItem>
-                    </ComboBox>
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Custom Vision Iteration Name (customvision.ai 'Pusblished As')" Margin="5" ></TextBlock>
+                    <TextBox x:Name="textCustomVisionIterationName" Text="" Margin="5" Width="400px"  HorizontalAlignment="Left" TextChanged="TextCustomVisionIterationName_TextChanged" />
                 </StackPanel>
-            </Grid>
-            <Grid Margin="10">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Camera" TextAlignment="Center" VerticalAlignment="Center"></TextBlock>
-                    <ComboBox x:Name="dropdownCamera"  Margin="20,0,0,0" SelectionChanged="dropdownCamera_SelectionChanged" >
-                        <ComboBoxItem Content="east"></ComboBoxItem>
-                    </ComboBox>
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Custom Vision Threshold" Margin="5" ></TextBlock>
+                    <Slider x:Name="sliderCustomVision" Width="200" HorizontalAlignment="Left" Maximum="100"  ValueChanged="Slider_ValueChanged"/>
+
                 </StackPanel>
-            </Grid>
-            <Grid Margin="10">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Send me all your input" TextAlignment="Center" VerticalAlignment="Center"></TextBlock>
-                    <HyperlinkButton Content="brrobe@microsoft.com" Margin="20,0,0,0" Click="HyperlinkButton_Click"></HyperlinkButton>
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Show age and gender (WARNING this is not recommended due to current MS policy)" Margin="5" ></TextBlock>
+                    <ToggleSwitch x:Name="toggleShowAge"  Margin="5" Toggled="ToggleShowAge_Toggled" />
                 </StackPanel>
-            </Grid>
-        </StackPanel>
-        <Button x:Name="buttonClose" Content="Close" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="20,20,20,20" Click="buttonClose_Click"/>
+                <TextBlock Text="Hardware" 
+                    Style="{StaticResource TitleTextBlockStyle}"
+                    Margin="0,40,0,0"
+                    FontWeight="Normal"/>
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Camera" Margin="5" ></TextBlock>
+                        <ComboBox x:Name="dropdownCamera"  Margin="5" SelectionChanged="dropdownCamera_SelectionChanged" >
+                            <ComboBoxItem Content="east"></ComboBoxItem>
+                        </ComboBox>
+                </StackPanel>
+                <TextBlock Text="Familiar Faces" 
+                    Style="{StaticResource TitleTextBlockStyle}"
+                    Margin="0,40,0,0"
+                    FontWeight="Normal"/>
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Add Person" ></TextBlock>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox x:Name="textNewPerson" Text="" Margin="5" Width="400px" TextChanged="textFaceAPIKey_TextChanged" HorizontalAlignment="Left" Height="32" />
+                        <Button x:Name="buttonAddPerson" Content="Add" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="20,20,20,20" Click="ButtonAddPerson_Click" />
+
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="Faces" Margin="5" ></TextBlock>
+                    <StackPanel Margin="0,10,0,0">
+                        <TextBlock Text="Do Face Detection" Margin="5" ></TextBlock>
+                        <ToggleSwitch x:Name="toggleFaceDetect"  Margin="5" Toggled="ToggleFaceDetect_Toggled"  />
+                    </StackPanel>
+                    <StackPanel Margin="0,10,0,0">
+                        <TextBlock Text="Face Detect Threshold" Margin="5" ></TextBlock>
+                        <Slider x:Name="sliderFaceDetect" Width="200" HorizontalAlignment="Left" Maximum="100" ValueChanged="SliderFaceDetect_ValueChanged"/>
+
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <ComboBox x:Name="dropdownPerson"  Margin="5" SelectionChanged="DropdownPerson_SelectionChanged"  >
+                            <ComboBoxItem Content="east"></ComboBoxItem>
+                        </ComboBox>
+                        <Button x:Name="buttonAddImages" Content="Add Images" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5" Click="ButtonAddImages_Click"  />
+                        <Button x:Name="buttonDeleteUser" Content="Delete" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5" Click="ButtonDeleteUser_Click" />
+                    </StackPanel>
+                    <TextBlock x:Name="txtPersonFaceInfo" Text="Faces" Margin="5" ></TextBlock>
+                </StackPanel>
+                <Button x:Name="buttonClose" Content="Save &amp;  Close" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="20,20,20,20" Click="buttonClose_Click"/>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Page>

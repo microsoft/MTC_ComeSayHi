@@ -12,7 +12,7 @@
 
     <Grid x:Name="gridMain" Background="Transparent">
         <CaptureElement x:Name="captureControl" Margin="20" Stretch="UniformToFill" IsHitTestVisible="False"></CaptureElement>
-        <Border VerticalAlignment="Bottom" Background="#996E6E6E" Margin="20">
+        <Border VerticalAlignment="Bottom" Background="#82F25022" Margin="20">
             <TextBlock x:Name="textDescription" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="30" TextAlignment="Center" Foreground="White"/>
         </Border>
     </Grid>

@@ -28,8 +28,25 @@ namespace MTCSTLKiosk.Controls
 
         public void UpdateEvent(CognitiveEvent mainEvent)
         {
-            textTranslationOriginal.Text = mainEvent.PrimarySpeechMessage;
-            textTranslation.Text = mainEvent.SecondarySpeechMessage;
+            if(mainEvent.ClearData)
+            {
+                textTranslationOriginalRT.Text = "";
+                textTranslationRT.Text = "";
+                textTranslationOriginal.Text = "";
+                textTranslation.Text = "";
+
+            }
+            if (!string.IsNullOrEmpty(mainEvent.PrimarySpeechMessage))
+            {
+                textTranslationOriginalRT.Text = mainEvent.PrimarySpeechMessage;
+                textTranslationRT.Text = mainEvent.SecondarySpeechMessage;
+            }
+
+            if (!string.IsNullOrEmpty(mainEvent.PrimarySpeechMessageFinal))
+            {
+                textTranslationOriginal.Text = mainEvent.PrimarySpeechMessageFinal;
+                textTranslation.Text = mainEvent.SecondarySpeechMessageFinal;
+            }
         }
     }
 }

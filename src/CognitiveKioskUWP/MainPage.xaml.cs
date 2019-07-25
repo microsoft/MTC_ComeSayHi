@@ -2,6 +2,8 @@
 using Microsoft.AppCenter.Analytics;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
+using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction;
+using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction.Models;
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Translation;
@@ -21,6 +23,7 @@ using Windows.Media;
 using Windows.Media.Capture;
 using Windows.Media.Core;
 using Windows.Media.MediaProperties;
+using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.System.Display;
 using Windows.UI.Core;
@@ -43,6 +46,8 @@ namespace MTCSTLKiosk
     public sealed partial class MainPage : Page
     {
         private Settings settings;
+        private int imageWidth = 0;
+        private int imageHeight = 0;
 
         public MainPage()
         {
@@ -54,10 +59,10 @@ namespace MTCSTLKiosk
             DisableUI();
             timerFace = new DispatcherTimer();
             timerFace.Tick += TimerFace_Tick;
-            timerFace.Interval = new TimeSpan(0, 0, 2);
+            timerFace.Interval = new TimeSpan(0, 0, 2, 0);
             timerTakePicture = new DispatcherTimer();
             timerTakePicture.Tick += TimerTakePicture_Tick;
-            timerTakePicture.Interval = new TimeSpan(0, 0, 0, 1, 0);
+            timerTakePicture.Interval = new TimeSpan(0, 0, 0, 0, 500);
             timerFailsafe = new DispatcherTimer();
             timerFailsafe.Tick += TimerFailsafe_Tick;
             timerFailsafe.Interval = new TimeSpan(0, 0, 10, 0, 0);
@@ -66,6 +71,9 @@ namespace MTCSTLKiosk
             await StartPreviewAsync();
             InfoFadeOut.Begin();
         }
+        bool loopWorking = true;
+
+
 
         private async void TimerFailsafe_Tick(object sender, object e)
         {
@@ -77,7 +85,7 @@ namespace MTCSTLKiosk
                 
             }
         }
-
+        DateTime proc = DateTime.Now;
         private async void TimerTakePicture_Tick(object sender, object e)
         {
             try
@@ -181,6 +189,7 @@ namespace MTCSTLKiosk
 
                 // In this scenario, choose detection speed over accuracy
                 definition.DetectionMode = FaceDetectionMode.HighPerformance;
+                imageAnalysisRunning = false;
 
                 // Add the effect to the preview stream
                 _faceDetectionEffect = (FaceDetectionEffect)await mediaCapture.AddVideoEffectAsync(definition, MediaStreamType.VideoPreview);
@@ -206,7 +215,7 @@ namespace MTCSTLKiosk
                 captionsControl.MainCapture.Source = mediaCapture;
                 speechControl.MainCapture.Source = mediaCapture2;
                 tagsControl.MainCapture.Source = mediaCapture3;
-                captureBottomRight.Source = mediaCapture4;
+                facesControl.MainCapture.Source = mediaCapture4;
                 await mediaCapture.StartPreviewAsync();
                 await mediaCapture2.StartPreviewAsync();
                 await mediaCapture3.StartPreviewAsync();
@@ -225,6 +234,7 @@ namespace MTCSTLKiosk
             {
                 try
                 {
+
                     if (!isFaceFound || DateTime.Now.Subtract(faceLastDate).TotalMinutes > 5)
                     {
                         Analytics.TrackEvent("Faces found, starting capture");
@@ -237,6 +247,7 @@ namespace MTCSTLKiosk
                         });
                     }
                     faceLastDate = DateTime.Now;
+                                                        
 
                 }
                 catch (Exception)
@@ -251,7 +262,7 @@ namespace MTCSTLKiosk
         private async Task ActivateUI()
         {
             tagsControl.Visibility = Visibility.Visible;
-            gridCaptureBottomRight.Visibility = Visibility.Visible;
+            facesControl.Visibility = Visibility.Visible;
             captionsControl.Visibility = Visibility.Visible;
             speechControl.Visibility = Visibility.Visible;
             timerTakePicture.Start();
@@ -270,9 +281,10 @@ namespace MTCSTLKiosk
         private void DisableUI()
         {
             tagsControl.Visibility = Visibility.Collapsed;
-            gridCaptureBottomRight.Visibility = Visibility.Collapsed;
+            facesControl.Visibility = Visibility.Collapsed;
             captionsControl.Visibility = Visibility.Collapsed;
             speechControl.Visibility = Visibility.Collapsed;
+            speechControl.UpdateEvent(new CognitiveEvent() { ClearData = true });
             if (timerTakePicture != null)
                 timerTakePicture.Stop();
             isFaceFound = false;
@@ -310,7 +322,7 @@ namespace MTCSTLKiosk
                     {
                         try
                         {
-                            Debug.WriteLine($"Message received {e.Result.Text}");
+                            //Debug.WriteLine($"Message received {e.Result.Text}");
                             string languageLong = textLanguges[e.Result.Translations.First().Key];
                             UpdateTranslationUI($"English: {e.Result.Text}", $"{languageLong}: {e.Result.Translations.First().Value}");
 
@@ -323,7 +335,12 @@ namespace MTCSTLKiosk
 
                     recognizer.Recognized += (s, e) =>
                     {
-                        var result = e.Result;
+                        //Debug.WriteLine($"Message received {e.Result.Text}");
+                        if (e.Result.Translations.Count() > 0)
+                        {
+                            string languageLong = textLanguges[e.Result.Translations.FirstOrDefault().Key];
+                            UpdateTranslationFinalUI($"{e.Result.Text}", $"{e.Result.Translations.First().Value}");
+                        }
                     };
 
                     recognizer.Canceled += (s, e) =>
@@ -391,6 +408,21 @@ namespace MTCSTLKiosk
             }
         }
 
+        private void UpdateTranslationFinalUI(string messageOriginal, string messageTranslation)
+        {
+            if (Dispatcher.HasThreadAccess)
+            {
+                speechControl.UpdateEvent(new CognitiveEvent() { PrimarySpeechMessageFinal = messageOriginal, SecondarySpeechMessageFinal = messageTranslation });
+            }
+            else
+            {
+                var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    speechControl.UpdateEvent(new CognitiveEvent() { PrimarySpeechMessageFinal = messageOriginal, SecondarySpeechMessageFinal = messageTranslation });
+                });
+            }
+        }
+
         #endregion
 
         #region Computer Vision
@@ -409,6 +441,24 @@ namespace MTCSTLKiosk
                 VideoFrame previewFrame = await mediaCapture.GetPreviewFrameAsync(videoFrame);
 
                 savedImage = previewFrame.SoftwareBitmap;
+                bool bear = false;
+                if (bear)
+                {
+                    StorageFile tempFile = await ApplicationData.Current.TemporaryFolder.CreateFileAsync(
+                                                        "FaceRecoCameraCapture.png",
+                                                        CreationCollisionOption.GenerateUniqueName);
+                    if (savedImage != null)
+                    {
+                        // save image file to cache
+
+                        using (IRandomAccessStream stream = await tempFile.OpenAsync(FileAccessMode.ReadWrite))
+                        {
+                            BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, stream);
+                            encoder.SetSoftwareBitmap(savedImage);
+                            await encoder.FlushAsync();
+                        }
+                    }
+                }
 
                 previewFrame.Dispose();
                 previewFrame = null;
@@ -422,18 +472,46 @@ namespace MTCSTLKiosk
             }
             return null;
         }
+        bool imageAnalysisRunning = false;
 
         private async Task ProcessImage(SoftwareBitmap image)
         {
             try
             {
+                Func<Task<Stream>> imageStreamCallback;
+
+                using (InMemoryRandomAccessStream stream = new InMemoryRandomAccessStream())
+                {
+                    BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, stream);
+                    encoder.SetSoftwareBitmap(image);
+                    await encoder.FlushAsync();
+
+                    // Read the pixel bytes from the memory stream
+                    using (var reader = new DataReader(stream.GetInputStreamAt(0)))
+                    {
+                        var bytes = new byte[stream.Size];
+                        await reader.LoadAsync((uint)stream.Size);
+                        reader.ReadBytes(bytes);
+                        imageStreamCallback = () => Task.FromResult<Stream>(new MemoryStream(bytes));
+                    }
+                }
+
+            
                 Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ComputerVisionClient visionClient = new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ComputerVisionClient(
                     new ApiKeyServiceClientCredentials(settings.VisionKey),
                     new System.Net.Http.DelegatingHandler[] { });
 
+                // Create a prediction endpoint, passing in the obtained prediction key
+                CustomVisionPredictionClient customVisionClient = new CustomVisionPredictionClient()
+                {
+                    ApiKey = settings.CustomVisionKey,
+                    Endpoint = $"https://{settings.CustomVisionRegion}.api.cognitive.microsoft.com"
+                };
+
                 Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient faceClient = new Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient(
                     new ApiKeyServiceClientCredentials(settings.FaceKey),
                     new System.Net.Http.DelegatingHandler[] { });
+
 
                 visionClient.Endpoint = $"https://{settings.VisionRegion}.api.cognitive.microsoft.com";
                 faceClient.Endpoint = $"https://{settings.FaceRegion}.api.cognitive.microsoft.com";
@@ -442,7 +520,7 @@ namespace MTCSTLKiosk
                         new List<VisualFeatureTypes>()
                     {
                     VisualFeatureTypes.Categories, VisualFeatureTypes.Description,
-                    VisualFeatureTypes.Tags, VisualFeatureTypes.Faces
+                    VisualFeatureTypes.Tags, VisualFeatureTypes.Faces, VisualFeatureTypes.Brands
                     };
                 // The list of Face attributes to return.
                 IList<FaceAttributeType> faceAttributes =
@@ -455,30 +533,66 @@ namespace MTCSTLKiosk
 
                 try
                 {
-                    if (DateTime.Now.Subtract(imageAnalysisLastDate).TotalSeconds > 1)
+                    if (!imageAnalysisRunning && DateTime.Now.Subtract(imageAnalysisLastDate).TotalMilliseconds > 1000)
                     {
-                        using (var ms = new InMemoryRandomAccessStream())
+                        imageAnalysisRunning = true;
+
+                        _ = Task.Run(async () =>
                         {
-                            BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, ms);
-                            encoder.SetSoftwareBitmap(image);
-                            await encoder.FlushAsync();
+                            ImageAnalysis analysis = await visionClient.AnalyzeImageInStreamAsync(await imageStreamCallback(), features);
+                            ImagePrediction analysisCV = null;
 
-                            var analysis = await visionClient.AnalyzeImageInStreamAsync(ms.AsStream(), features);
-                            UpdateWithAnalysis(analysis);
-                        }
-                        imageAnalysisLastDate = DateTime.Now;
+                            try
+                            {
+                                analysisCV = await customVisionClient.DetectImageWithNoStoreAsync(new Guid(settings.CustomVisionProjectId), settings.CustomVisionIterationName, await imageStreamCallback());
+
+                            }
+                            catch (Exception)
+                            {
+                                // Throw away error
+                            }
+
+
+                            UpdateWithAnalysis(analysis, analysisCV);
+
+                            imageAnalysisLastDate = DateTime.Now;
+                            imageAnalysisRunning = false;
+                        });
                     }
 
 
-                    using (var ms = new InMemoryRandomAccessStream())
+
+                    var analysisFace = await faceClient.Face.DetectWithStreamWithHttpMessagesAsync(await imageStreamCallback(), returnFaceId: true, returnFaceAttributes: faceAttributes);
+                    imageWidth = image.PixelWidth;
+                    imageHeight = image.PixelHeight;
+                    facesControl.UpdateEvent(new CognitiveEvent() { Faces = analysisFace.Body, ImageWidth = image.PixelWidth, ImageHeight = image.PixelHeight });
+
+                    if (analysisFace.Body.Count() > 0 && settings.DoFaceDetection)
                     {
-                        BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, ms);
-                        encoder.SetSoftwareBitmap(image);
-                        await encoder.FlushAsync();
-
-                        var analysisFace = await faceClient.Face.DetectWithStreamWithHttpMessagesAsync(ms.AsStream(), returnFaceAttributes: faceAttributes);
-                        UpdateFaces(analysisFace, image.PixelHeight, image.PixelWidth);
-                    }
+                        var groups = await faceClient.PersonGroup.ListWithHttpMessagesAsync();
+                        var group = groups.Body.FirstOrDefault(x => x.Name == settings.GroupName);
+                        if (group != null)
+                        {
+                            var results = await faceClient.Face.IdentifyWithHttpMessagesAsync(analysisFace.Body.Select(x => x.FaceId.Value).ToArray(), group.PersonGroupId);
+                            foreach (var identifyResult in results.Body)
+                            {
+                                var cand = identifyResult.Candidates.FirstOrDefault(x => x.Confidence > settings.FaceThreshold / 100d);
+                                if (cand == null)
+                                {
+                                    Console.WriteLine("No one identified");
+                                }
+                                else
+                                {
+                                    // Get top 1 among all candidates returned
+                                    var candidateId = cand.PersonId;
+                                    var person = await faceClient.PersonGroupPerson.GetWithHttpMessagesAsync(group.PersonGroupId, candidateId);
+                                        tagsControl.UpdateEvent(new CognitiveEvent() { IdentifiedPerson = person.Body, IdentifiedPersonPrediction = cand.Confidence });
+                                        Console.WriteLine("Identified as {0}", person.Body.Name);
+                                    }
+                                }
+                            }
+                        }
+                    
 
                 }
                 catch (Exception)
@@ -493,18 +607,18 @@ namespace MTCSTLKiosk
             }
         }
 
-        private void UpdateWithAnalysis(ImageAnalysis analysis)
+        private void UpdateWithAnalysis(ImageAnalysis analysis, ImagePrediction analysisCV)
         {
             try
            {
                 if (Dispatcher.HasThreadAccess)
                 {
-                    captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis });
-                    tagsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis });
+                    captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageAnalysisCV = analysisCV });
+                    tagsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageAnalysisCV = analysisCV });
                 }
                 else
                 {
-                    var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis }); tagsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis }); });
+                    var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageAnalysisCV = analysisCV }); tagsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageAnalysisCV = analysisCV }); });
                 }
             }
             catch (Exception)
@@ -514,141 +628,6 @@ namespace MTCSTLKiosk
             }
         }
 
-        private void UpdateFaces(Microsoft.Rest.HttpOperationResponse<System.Collections.Generic.IList<Microsoft.Azure.CognitiveServices.Vision.Face.Models.DetectedFace>> message, int imageHeight, int imageWidth)
-        {
-            try
-            {
-                var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-                {
-
-                    textFaces1.Text = "";
-                    textFaces2.Text = "";
-                    textFaces3.Text = "";
-
-                    if (message.Body.Count() >= 3)
-                    {
-                        ageControl1.Visibility = Visibility.Visible;
-                        ageControl2.Visibility = Visibility.Visible;
-                        ageControl3.Visibility = Visibility.Visible;
-                    }
-                    else if (message.Body.Count() >= 2)
-                    {
-                        ageControl1.Visibility = Visibility.Visible;
-                        ageControl2.Visibility = Visibility.Visible;
-                        ageControl3.Visibility = Visibility.Collapsed;
-
-                    }
-                    else if (message.Body.Count() >= 1)
-                    {
-                        ageControl1.Visibility = Visibility.Visible;
-                        ageControl2.Visibility = Visibility.Collapsed;
-                        ageControl3.Visibility = Visibility.Collapsed;
-
-                    }
-                    else if (message.Body.Count() >= 0)
-                    {
-                        ageControl1.Visibility = Visibility.Collapsed;
-                        ageControl2.Visibility = Visibility.Collapsed;
-                        ageControl3.Visibility = Visibility.Collapsed;
-
-                    }
-                    var facesSorted = message.Body.OrderBy(x => x.FaceRectangle.Left);
-                    for (int i = 0; i < facesSorted.Count(); i++)
-                    {
-                        var face = message.Body[i];
-
-                        int convertedTop = ((face.FaceRectangle.Top * (int)captureBottomRight.ActualHeight) / imageHeight) - ((int)captureBottomRight.Margin.Top) - ((int)ageControl1.ActualHeight * 2);
-                        int convertedLeft = ((face.FaceRectangle.Left * (int)captureBottomRight.ActualWidth) / imageWidth);
-
-                        double maxEmotion = face.FaceAttributes.Emotion.Anger;
-                        string choosenEmotion = "Anger";
-
-                        if (face.FaceAttributes.Emotion.Contempt > maxEmotion)
-                        {
-                            maxEmotion = face.FaceAttributes.Emotion.Contempt;
-                            choosenEmotion = "Contempt";
-                        }
-
-                        if (face.FaceAttributes.Emotion.Disgust > maxEmotion)
-                        {
-                            maxEmotion = face.FaceAttributes.Emotion.Disgust;
-                            choosenEmotion = "Disgust";
-                        }
-
-                        if (face.FaceAttributes.Emotion.Fear > maxEmotion)
-                        {
-                            maxEmotion = face.FaceAttributes.Emotion.Fear;
-                            choosenEmotion = "Fear";
-                        }
-
-                        if (face.FaceAttributes.Emotion.Happiness > maxEmotion)
-                        {
-                            maxEmotion = face.FaceAttributes.Emotion.Happiness;
-                            choosenEmotion = "Happiness";
-                        }
-
-                        if (face.FaceAttributes.Emotion.Neutral > maxEmotion)
-                        {
-                            maxEmotion = face.FaceAttributes.Emotion.Neutral;
-                            choosenEmotion = "Neutral";
-                        }
-
-                        if (face.FaceAttributes.Emotion.Sadness > maxEmotion)
-                        {
-                            maxEmotion = face.FaceAttributes.Emotion.Sadness;
-                            choosenEmotion = "Sadness";
-                        }
-
-                        if (face.FaceAttributes.Emotion.Surprise > maxEmotion)
-                        {
-                            maxEmotion = face.FaceAttributes.Emotion.Surprise;
-                            choosenEmotion = "Surprise";
-                        }
-                        string hair = "";
-                        if (face.FaceAttributes.Hair.Bald > .6)
-                            hair = "bald";
-                        else
-                        {
-                            if(face.FaceAttributes.Hair.HairColor.Count > 0)
-                             hair = face.FaceAttributes.Hair.HairColor.First().Color.ToString();
-                        }
-                        string userInfo = $"{i + 1}: {face.FaceAttributes.Gender.ToString()} ({face.FaceAttributes.Age.ToString()})\nEmotion: {choosenEmotion} \nGlasses: {face.FaceAttributes.Glasses.ToString()} \nSmile: {face.FaceAttributes.Smile.ToString()} \nHair: {hair} ";
-
-                        AgeControl ageControl = null;
-
-                        switch (i)
-                        {
-                            case 0:
-                                ageControl = ageControl1;
-                                textFaces1.Text = userInfo;
-                                break;
-                            case 1:
-                                ageControl = ageControl2;
-                                textFaces2.Text = userInfo;
-                                break;
-                            case 2:
-                                ageControl = ageControl3;
-                                textFaces3.Text = userInfo;
-                                break;
-                        }
-
-                        if (ageControl == null)
-                            break;
-
-                        ageControl.Margin = new Thickness(convertedLeft, convertedTop, 0, 0);
-                        ageControl.Visibility = Visibility;
-                        ageControl.SetUserInfo(i + 1, face.FaceAttributes.Gender.ToString(), face.FaceAttributes.Age, choosenEmotion);
-
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-                //Eat excepiton
-            }
-
-        }
         #endregion
 
         private void Settings_Tapped(object sender, TappedRoutedEventArgs e)
