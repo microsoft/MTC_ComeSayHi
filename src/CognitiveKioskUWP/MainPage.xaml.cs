@@ -71,9 +71,6 @@ namespace MTCSTLKiosk
             await StartPreviewAsync();
             InfoFadeOut.Begin();
         }
-        bool loopWorking = true;
-
-
 
         private async void TimerFailsafe_Tick(object sender, object e)
         {
@@ -161,10 +158,11 @@ namespace MTCSTLKiosk
 
                 mediaCapture = new MediaCapture();
                 await mediaCapture.InitializeAsync(new MediaCaptureInitializationSettings() { SharingMode = MediaCaptureSharingMode.ExclusiveControl, VideoDeviceId = deviceId });
-                var resolutions = mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.Photo).ToList();
+                var resolutions = mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.VideoPreview).ToList();
 
-                Windows.Media.MediaProperties.VideoEncodingProperties reslution = (Windows.Media.MediaProperties.VideoEncodingProperties)resolutions.Where(x => x.Type == "Video").OrderByDescending(x => ((Windows.Media.MediaProperties.VideoEncodingProperties)x).Width).FirstOrDefault();
-
+                var availableResolutions = mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.VideoPreview).Cast<VideoEncodingProperties>().OrderByDescending(v => v.Width * v.Height * (v.FrameRate.Numerator / v.FrameRate.Denominator));
+                //1080p or lower
+                var reslution = availableResolutions.FirstOrDefault(v => v.Height <= 1080);
 
                 // set used resolution
                 await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.Photo, reslution);

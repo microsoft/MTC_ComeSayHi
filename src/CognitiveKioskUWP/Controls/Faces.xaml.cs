@@ -21,7 +21,6 @@ namespace MTCSTLKiosk.Controls
     public sealed partial class Faces : UserControl, IQuarterControl
     {
         private Settings settings;
-        private System.Collections.Generic.IList<Microsoft.Azure.CognitiveServices.Vision.Face.Models.DetectedFace> lastFaces = null;
         public Faces()
         {
             this.InitializeComponent();
