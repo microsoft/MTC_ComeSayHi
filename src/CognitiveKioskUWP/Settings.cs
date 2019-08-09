@@ -159,6 +159,18 @@ namespace MTCSTLKiosk
             set { localSettings.Values["FaceThreshold"] = value; }
         }
 
+        public int FaceCVFPM
+        {
+            get
+            {
+                if (localSettings.Values.ContainsKey("FaceCVFPM"))
+                    return (int)localSettings.Values["FaceCVFPM"];
+                else
+                    return 60;
+            }
+            set { localSettings.Values["FaceCVFPM"] = value; }
+        }
+
         public string FaceKey
         {
             get

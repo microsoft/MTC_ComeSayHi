@@ -51,6 +51,7 @@ namespace MTCSTLKiosk
             textVisionAPIKey.Text = settings.VisionKey;
             textSpeechAPIKey.Text = settings.SpeechKey;
             textCustomVisionAPIKey.Text = settings.CustomVisionKey;
+            textFramesPerMinute.Text = settings.FaceCVFPM.ToString();
 
             textCustomVisionProjectID.Text = settings.CustomVisionProjectId;
             textCustomVisionIterationName.Text = settings.CustomVisionIterationName;
@@ -401,6 +402,14 @@ namespace MTCSTLKiosk
         private void SliderFaceDetect_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
             settings.FaceThreshold = (int)sliderFaceDetect.Value;
+        }
+
+        private void TextFramesPerMinute_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            int fpm = 60;
+            int.TryParse(textFramesPerMinute.Text, out fpm);
+            settings.FaceCVFPM = fpm;
+
         }
     }
 }

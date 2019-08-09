@@ -52,7 +52,18 @@ namespace MTCSTLKiosk
         public MainPage()
         {
             this.InitializeComponent();
+            Window.Current.Activated += Current_Activated;
         }
+
+        private async void Current_Activated(object sender, WindowActivatedEventArgs e)
+        {
+            if ((e.WindowActivationState == Windows.UI.Core.CoreWindowActivationState.CodeActivated ||
+                  e.WindowActivationState == Windows.UI.Core.CoreWindowActivationState.PointerActivated) && mediaCapture != null && mediaCapture.CameraStreamState != Windows.Media.Devices.CameraStreamState.Streaming)
+            {
+                await StartPreviewAsync();
+            }
+        }
+
         protected async override void OnNavigatedTo(NavigationEventArgs e)
         {
             settings = Settings.SingletonInstance;
@@ -62,10 +73,10 @@ namespace MTCSTLKiosk
             timerFace.Interval = new TimeSpan(0, 0, 2, 0);
             timerTakePicture = new DispatcherTimer();
             timerTakePicture.Tick += TimerTakePicture_Tick;
-            timerTakePicture.Interval = new TimeSpan(0, 0, 0, 0, 500);
+            timerTakePicture.Interval = new TimeSpan(0, 0, 0, 0, 60000/settings.FaceCVFPM);
             timerFailsafe = new DispatcherTimer();
             timerFailsafe.Tick += TimerFailsafe_Tick;
-            timerFailsafe.Interval = new TimeSpan(0, 0, 10, 0, 0);
+            timerFailsafe.Interval = new TimeSpan(0, 0, 30, 0, 0);
             timerFailsafe.Start();
 
             await StartPreviewAsync();
@@ -75,9 +86,41 @@ namespace MTCSTLKiosk
         private async void TimerFailsafe_Tick(object sender, object e)
         {
             // Check for shutoff time
-            if (DateTime.Now.Subtract(faceLastDate).TotalMinutes > 5)
+            if (DateTime.Now.Subtract(faceLastDate).TotalMinutes > 30)
             {
                 DisableUI();
+                try
+                {
+                    await mediaCapture.StopPreviewAsync();
+
+                }
+                catch (Exception)
+                {
+                }
+                try
+                {
+                    await mediaCapture2.StopPreviewAsync();
+
+                }
+                catch (Exception)
+                {
+                }
+                try
+                {
+                    await mediaCapture3.StopPreviewAsync();
+
+                }
+                catch (Exception)
+                {
+                }
+                try
+                {
+                    await mediaCapture4.StopPreviewAsync();
+
+                }
+                catch (Exception)
+                {
+                }
                 await StartPreviewAsync();
                 
             }
@@ -116,7 +159,7 @@ namespace MTCSTLKiosk
             try
             {
                 // Check for shutoff time
-                if (DateTime.Now.Subtract(faceLastDate).TotalSeconds > 60)
+                if (DateTime.Now.Subtract(faceLastDate).TotalSeconds > 30)
                 {
                     DisableUI();
                     isFaceFound = false;
@@ -199,12 +242,14 @@ namespace MTCSTLKiosk
                 _faceDetectionEffect.Enabled = true;
 
                 // Register for face detection events
-                _faceDetectionEffect.FaceDetected += _faceDetectionEffect_FaceDetectedAsync; ;
+                _faceDetectionEffect.FaceDetected += _faceDetectionEffect_FaceDetectedAsync;
+                timerFailsafe.Start();
             }
             catch (Exception)
             {
                 // This will be thrown if the user denied access to the camera in privacy settings
                 Console.Write("The app was denided access to the camera");
+                faceLastDate = DateTime.Now.Subtract(new TimeSpan(1, 1, 1));
                 return;
             }
 
@@ -285,8 +330,11 @@ namespace MTCSTLKiosk
             speechControl.UpdateEvent(new CognitiveEvent() { ClearData = true });
             if (timerTakePicture != null)
                 timerTakePicture.Stop();
+            if (timerFace != null)
+                timerFace.Stop();
             isFaceFound = false;
             StopSpeechTranslation();
+
         }
 
         #region Speech Translation
@@ -439,25 +487,7 @@ namespace MTCSTLKiosk
                 VideoFrame previewFrame = await mediaCapture.GetPreviewFrameAsync(videoFrame);
 
                 savedImage = previewFrame.SoftwareBitmap;
-                bool bear = false;
-                if (bear)
-                {
-                    StorageFile tempFile = await ApplicationData.Current.TemporaryFolder.CreateFileAsync(
-                                                        "FaceRecoCameraCapture.png",
-                                                        CreationCollisionOption.GenerateUniqueName);
-                    if (savedImage != null)
-                    {
-                        // save image file to cache
-
-                        using (IRandomAccessStream stream = await tempFile.OpenAsync(FileAccessMode.ReadWrite))
-                        {
-                            BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, stream);
-                            encoder.SetSoftwareBitmap(savedImage);
-                            await encoder.FlushAsync();
-                        }
-                    }
-                }
-
+                
                 previewFrame.Dispose();
                 previewFrame = null;
 
@@ -630,6 +660,41 @@ namespace MTCSTLKiosk
 
         private void Settings_Tapped(object sender, TappedRoutedEventArgs e)
         {
+            DisableUI();
+            if (timerFailsafe != null)
+                timerFailsafe.Stop();
+            try
+            {
+                _ = mediaCapture.StopPreviewAsync();
+
+            }
+            catch (Exception)
+            {
+            }
+            try
+            {
+                _ = mediaCapture4.StopPreviewAsync();
+
+            }
+            catch (Exception)
+            {
+            }
+            try
+            {
+                _ = mediaCapture2.StopPreviewAsync();
+
+            }
+            catch (Exception)
+            {
+            }
+            try
+            {
+                _ = mediaCapture3.StopPreviewAsync();
+
+            }
+            catch (Exception)
+            {
+            }
             Frame.Navigate(typeof(SettingsPage));
 
         }
