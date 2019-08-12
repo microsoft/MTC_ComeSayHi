@@ -69,13 +69,13 @@ namespace MTCSTLKiosk
             DisableUI();
             timerFace = new DispatcherTimer();
             timerFace.Tick += TimerFace_Tick;
-            timerFace.Interval = new TimeSpan(0, 0, 0, 1);
+            timerFace.Interval = new TimeSpan(0, 0, 1, 0);
             timerTakePicture = new DispatcherTimer();
             timerTakePicture.Tick += TimerTakePicture_Tick;
             timerTakePicture.Interval = new TimeSpan(0, 0, 0, 0, 60000/settings.FaceCVFPM);
             timerFailsafe = new DispatcherTimer();
             timerFailsafe.Tick += TimerFailsafe_Tick;
-            timerFailsafe.Interval = new TimeSpan(0, 0, 0, 10, 0);
+            timerFailsafe.Interval = new TimeSpan(0, 0, 10, 0, 0);
             timerFailsafe.Start();
 
             await StartPreviewAsync();
@@ -86,7 +86,7 @@ namespace MTCSTLKiosk
         private async void TimerFailsafe_Tick(object sender, object e)
         {
             // Check for shutoff time
-            if (DateTime.Now.Subtract(faceLastDate).TotalSeconds > 10)
+            if (DateTime.Now.Subtract(faceLastDate).TotalMinutes > 30)
             {
                 faceLastDate = DateTime.Now;
                 DisableUI();
@@ -166,7 +166,7 @@ namespace MTCSTLKiosk
             try
             {
                 // Check for shutoff time
-                if (DateTime.Now.Subtract(faceLastDate).TotalSeconds > 5)
+                if (DateTime.Now.Subtract(faceLastDate).TotalSeconds > 30)
                 {
                     DisableUI();
                     isFaceFound = false;
