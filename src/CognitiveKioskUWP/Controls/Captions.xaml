@@ -6,12 +6,16 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    d:DesignHeight="300"
+    d:DesignHeight="200"
     d:DesignWidth="400">
 
 
     <Grid x:Name="gridMain" Background="Transparent">
         <CaptureElement x:Name="captureControl" Margin="20" Stretch="UniformToFill" IsHitTestVisible="False"></CaptureElement>
+        <local:ObjectBox Width="500" Height="300" x:Name="box1" Visibility="Collapsed" VerticalAlignment="Top" HorizontalAlignment="Left" />
+        <local:ObjectBox Width="500" Height="300" x:Name="box2" Visibility="Collapsed" VerticalAlignment="Top" HorizontalAlignment="Left"  />
+        <local:ObjectBox Width="500" Height="300" x:Name="box3" Visibility="Collapsed" VerticalAlignment="Top" HorizontalAlignment="Left"  />
+        <local:ObjectBox Width="500" Height="300" x:Name="box4" Visibility="Collapsed" VerticalAlignment="Top" HorizontalAlignment="Left"  />
         <Border VerticalAlignment="Bottom" Background="#82F25022" Margin="20">
             <TextBlock x:Name="textDescription" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="30" TextAlignment="Center" Foreground="White"/>
         </Border>

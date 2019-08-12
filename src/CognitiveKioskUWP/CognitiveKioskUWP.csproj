@@ -116,6 +116,9 @@
       <DependentUpon>Faces.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\IQuarterControl.cs" />
+    <Compile Include="Controls\ObjectBox.xaml.cs">
+      <DependentUpon>ObjectBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Speech.xaml.cs">
       <DependentUpon>Speech.xaml</DependentUpon>
     </Compile>
@@ -160,6 +163,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\Faces.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ObjectBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

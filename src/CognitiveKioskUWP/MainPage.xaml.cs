@@ -52,7 +52,6 @@ namespace MTCSTLKiosk
         public MainPage()
         {
             this.InitializeComponent();
-            Window.Current.Activated += Current_Activated;
         }
 
         private async void Current_Activated(object sender, WindowActivatedEventArgs e)
@@ -70,61 +69,69 @@ namespace MTCSTLKiosk
             DisableUI();
             timerFace = new DispatcherTimer();
             timerFace.Tick += TimerFace_Tick;
-            timerFace.Interval = new TimeSpan(0, 0, 2, 0);
+            timerFace.Interval = new TimeSpan(0, 0, 0, 1);
             timerTakePicture = new DispatcherTimer();
             timerTakePicture.Tick += TimerTakePicture_Tick;
             timerTakePicture.Interval = new TimeSpan(0, 0, 0, 0, 60000/settings.FaceCVFPM);
             timerFailsafe = new DispatcherTimer();
             timerFailsafe.Tick += TimerFailsafe_Tick;
-            timerFailsafe.Interval = new TimeSpan(0, 0, 30, 0, 0);
+            timerFailsafe.Interval = new TimeSpan(0, 0, 0, 10, 0);
             timerFailsafe.Start();
 
             await StartPreviewAsync();
             InfoFadeOut.Begin();
+            Window.Current.Activated += Current_Activated;
         }
 
         private async void TimerFailsafe_Tick(object sender, object e)
         {
             // Check for shutoff time
-            if (DateTime.Now.Subtract(faceLastDate).TotalMinutes > 30)
+            if (DateTime.Now.Subtract(faceLastDate).TotalSeconds > 10)
             {
+                faceLastDate = DateTime.Now;
                 DisableUI();
-                try
-                {
-                    await mediaCapture.StopPreviewAsync();
-
-                }
-                catch (Exception)
-                {
-                }
-                try
-                {
-                    await mediaCapture2.StopPreviewAsync();
-
-                }
-                catch (Exception)
-                {
-                }
-                try
-                {
-                    await mediaCapture3.StopPreviewAsync();
-
-                }
-                catch (Exception)
-                {
-                }
-                try
-                {
-                    await mediaCapture4.StopPreviewAsync();
-
-                }
-                catch (Exception)
-                {
-                }
+                await StopMediaCapture();
                 await StartPreviewAsync();
-                
+
             }
         }
+
+        private async Task StopMediaCapture()
+        {
+            try
+            {
+                await mediaCapture.StopPreviewAsync();
+
+            }
+            catch (Exception)
+            {
+            }
+            try
+            {
+                await mediaCapture2.StopPreviewAsync();
+
+            }
+            catch (Exception)
+            {
+            }
+            try
+            {
+                await mediaCapture3.StopPreviewAsync();
+
+            }
+            catch (Exception)
+            {
+            }
+            try
+            {
+                await mediaCapture4.StopPreviewAsync();
+
+            }
+            catch (Exception)
+            {
+            }
+        }
+
         DateTime proc = DateTime.Now;
         private async void TimerTakePicture_Tick(object sender, object e)
         {
@@ -159,7 +166,7 @@ namespace MTCSTLKiosk
             try
             {
                 // Check for shutoff time
-                if (DateTime.Now.Subtract(faceLastDate).TotalSeconds > 30)
+                if (DateTime.Now.Subtract(faceLastDate).TotalSeconds > 5)
                 {
                     DisableUI();
                     isFaceFound = false;
@@ -229,7 +236,7 @@ namespace MTCSTLKiosk
                 definition.SynchronousDetectionEnabled = false;
 
                 // In this scenario, choose detection speed over accuracy
-                definition.DetectionMode = FaceDetectionMode.HighPerformance;
+                definition.DetectionMode = FaceDetectionMode.HighQuality;
                 imageAnalysisRunning = false;
 
                 // Add the effect to the preview stream
@@ -641,12 +648,12 @@ namespace MTCSTLKiosk
            {
                 if (Dispatcher.HasThreadAccess)
                 {
-                    captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageAnalysisCV = analysisCV });
+                    captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageAnalysisCV = analysisCV, ImageHeight = imageHeight, ImageWidth = imageWidth });
                     tagsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageAnalysisCV = analysisCV });
                 }
                 else
                 {
-                    var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageAnalysisCV = analysisCV }); tagsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageAnalysisCV = analysisCV }); });
+                    var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageAnalysisCV = analysisCV, ImageHeight = imageHeight, ImageWidth = imageWidth }); tagsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageAnalysisCV = analysisCV }); });
                 }
             }
             catch (Exception)
@@ -658,44 +665,14 @@ namespace MTCSTLKiosk
 
         #endregion
 
-        private void Settings_Tapped(object sender, TappedRoutedEventArgs e)
+        private async void Settings_Tapped(object sender, TappedRoutedEventArgs e)
         {
             DisableUI();
             if (timerFailsafe != null)
                 timerFailsafe.Stop();
-            try
-            {
-                _ = mediaCapture.StopPreviewAsync();
-
-            }
-            catch (Exception)
-            {
-            }
-            try
-            {
-                _ = mediaCapture4.StopPreviewAsync();
-
-            }
-            catch (Exception)
-            {
-            }
-            try
-            {
-                _ = mediaCapture2.StopPreviewAsync();
-
-            }
-            catch (Exception)
-            {
-            }
-            try
-            {
-                _ = mediaCapture3.StopPreviewAsync();
-
-            }
-            catch (Exception)
-            {
-            }
+            await this.StopMediaCapture();
             Frame.Navigate(typeof(SettingsPage));
+            Window.Current.Activated -= Current_Activated;
 
         }
     }
