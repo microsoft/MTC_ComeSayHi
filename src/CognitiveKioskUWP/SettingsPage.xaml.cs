@@ -43,15 +43,15 @@ namespace MTCSTLKiosk
         protected async override void OnNavigatedTo(NavigationEventArgs e)
         {
             dropdownRegion.ItemsSource = settings.Regions.ToArray();
-            dropdownFaceRegion.ItemsSource = settings.Regions.ToArray();
-            dropdownVisionRegion.ItemsSource = settings.Regions.ToArray();
             dropdownCustomVisionRegion.ItemsSource = settings.Regions.ToArray();
 
             textFaceAPIKey.Text = settings.FaceKey;
-            textVisionAPIKey.Text = settings.VisionKey;
+            textVisionAPIKey.Text = settings.ComputerVisionKey;
             textSpeechAPIKey.Text = settings.SpeechKey;
             textCustomVisionAPIKey.Text = settings.CustomVisionKey;
             textFramesPerMinute.Text = settings.FaceCVFPM.ToString();
+            textComputerVisionEndpoint.Text = settings.ComputerVisionEndpoint;
+            textFaceEndPoint.Text = settings.FaceEndpoint;
 
             textCustomVisionProjectID.Text = settings.CustomVisionProjectId;
             textCustomVisionIterationName.Text = settings.CustomVisionIterationName;
@@ -60,8 +60,6 @@ namespace MTCSTLKiosk
 
 
             dropdownRegion.SelectedValue = settings.SpeechRegion;
-            dropdownVisionRegion.SelectedValue = settings.VisionRegion;
-            dropdownFaceRegion.SelectedValue = settings.FaceRegion;
             dropdownCustomVisionRegion.SelectedValue = settings.CustomVisionRegion;
 
             toggleShowAge.IsOn = settings.ShowAgeAndGender;
@@ -89,7 +87,7 @@ namespace MTCSTLKiosk
                     new ApiKeyServiceClientCredentials(settings.FaceKey),
                     new System.Net.Http.DelegatingHandler[] { });
 
-                faceClient.Endpoint = $"https://{settings.FaceRegion}.api.cognitive.microsoft.com";
+                faceClient.Endpoint = settings.FaceEndpoint;
 
                 var groups = await faceClient.PersonGroup.ListWithHttpMessagesAsync();
                 var group = groups.Body.FirstOrDefault(x => x.Name == settings.GroupName);
@@ -121,7 +119,7 @@ namespace MTCSTLKiosk
                     new ApiKeyServiceClientCredentials(settings.FaceKey),
                     new System.Net.Http.DelegatingHandler[] { });
 
-                faceClient.Endpoint = $"https://{settings.FaceRegion}.api.cognitive.microsoft.com";
+                faceClient.Endpoint = settings.FaceEndpoint;
 
                 var groups = await faceClient.PersonGroup.ListWithHttpMessagesAsync();
                 var group = groups.Body.FirstOrDefault(x => x.Name == settings.GroupName);
@@ -150,7 +148,7 @@ namespace MTCSTLKiosk
                     new ApiKeyServiceClientCredentials(settings.FaceKey),
                     new System.Net.Http.DelegatingHandler[] { });
 
-                faceClient.Endpoint = $"https://{settings.FaceRegion}.api.cognitive.microsoft.com";
+                faceClient.Endpoint = settings.FaceEndpoint;
 
                 var groups = await faceClient.PersonGroup.ListWithHttpMessagesAsync();
                 var group = groups.Body.FirstOrDefault(x => x.Name == settings.GroupName);
@@ -176,7 +174,7 @@ namespace MTCSTLKiosk
                     new ApiKeyServiceClientCredentials(settings.FaceKey),
                     new System.Net.Http.DelegatingHandler[] { });
 
-                faceClient.Endpoint = $"https://{settings.FaceRegion}.api.cognitive.microsoft.com";
+                faceClient.Endpoint = settings.FaceEndpoint;
 
                 var groups = await faceClient.PersonGroup.ListWithHttpMessagesAsync();
                 var group = groups.Body.FirstOrDefault(x => x.Name == settings.GroupName);
@@ -214,7 +212,7 @@ namespace MTCSTLKiosk
 
         private async void textVisionAPIKey_TextChanged(object sender, TextChangedEventArgs e)
         {
-            settings.VisionKey = textVisionAPIKey.Text;
+            settings.ComputerVisionKey = textVisionAPIKey.Text;
             await BindFaces();
         }
 
@@ -223,18 +221,6 @@ namespace MTCSTLKiosk
             settings.SpeechRegion = (string)dropdownRegion.SelectedValue;
         }
 
-        private async void dropdownFaceRegion_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            settings.FaceRegion = (string)dropdownFaceRegion.SelectedValue;
-            await BindFaces();
-
-        }
-
-        private void dropdownVisionRegion_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            settings.VisionRegion = (string)dropdownVisionRegion.SelectedValue;
-
-        }
 
         private void textFaceAPIKey_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -307,7 +293,7 @@ namespace MTCSTLKiosk
                         new ApiKeyServiceClientCredentials(settings.FaceKey),
                         new System.Net.Http.DelegatingHandler[] { });
 
-                    faceClient.Endpoint = $"https://{settings.FaceRegion}.api.cognitive.microsoft.com";
+                    faceClient.Endpoint = settings.FaceEndpoint;
 
                     var groups = await faceClient.PersonGroup.ListWithHttpMessagesAsync();
                     var group = groups.Body.FirstOrDefault(x => x.Name == settings.GroupName);
@@ -410,6 +396,17 @@ namespace MTCSTLKiosk
             int.TryParse(textFramesPerMinute.Text, out fpm);
             settings.FaceCVFPM = fpm;
 
+        }
+
+        private async void TextFaceEndPoint_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            settings.FaceEndpoint = textFaceEndPoint.Text;
+            await BindFaces();
+        }
+
+        private void TextComputerVisionEndpoint_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            settings.ComputerVisionEndpoint = textComputerVisionEndpoint.Text;
         }
     }
 }
