@@ -87,7 +87,7 @@ namespace MTCSTLKiosk
             }
         }
 
-        public string VisionKey
+        public string ComputerVisionKey
         {
             get
             {
@@ -183,7 +183,7 @@ namespace MTCSTLKiosk
             set { localSettings.Values["FaceKey"] = value; }
         }
 
-        public string FaceRegion
+        private string FaceRegion
         {
             get
             {
@@ -195,7 +195,25 @@ namespace MTCSTLKiosk
             set { localSettings.Values["FaceRegion"] = value; }
         }
 
-        public string VisionRegion
+
+        public string FaceEndpoint
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(FaceRegion) && FaceRegion.Length < 20)
+                {
+                    localSettings.Values["FaceEndpoint"] = $"https://{FaceRegion}.api.cognitive.microsoft.com";
+                    FaceRegion = "";
+                }
+                if (localSettings.Values.ContainsKey("FaceEndpoint"))
+                    return (string)localSettings.Values["FaceEndpoint"];
+                else
+                    return string.Empty;
+            }
+            set { localSettings.Values["FaceEndpoint"] = value; }
+        }
+
+        private string ComputerVisionRegion
         {
             get
             {
@@ -206,6 +224,26 @@ namespace MTCSTLKiosk
             }
             set { localSettings.Values["VisionRegion"] = value; }
         }
+
+
+
+        public string ComputerVisionEndpoint
+        {
+            get
+            {
+                if(!string.IsNullOrEmpty(ComputerVisionRegion) && ComputerVisionRegion.Length < 20)
+                {
+                    localSettings.Values["ComputerVisionEndpoint"] = $"https://{ComputerVisionRegion}.api.cognitive.microsoft.com";
+                    ComputerVisionRegion = "";
+                }
+                if (localSettings.Values.ContainsKey("ComputerVisionEndpoint"))
+                    return (string)localSettings.Values["ComputerVisionEndpoint"];
+                else
+                    return string.Empty;
+            }
+            set { localSettings.Values["ComputerVisionEndpoint"] = value; }
+        }
+
 
         public string CustomVisionRegion
         {

@@ -215,7 +215,7 @@ namespace MTCSTLKiosk
                 var reslution = availableResolutions.FirstOrDefault(v => v.Height <= 1080);
 
                 // set used resolution
-                await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.Photo, reslution);
+                await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.VideoPreview, reslution);
 
                 mediaCapture2 = new MediaCapture();
                 await mediaCapture2.InitializeAsync(new MediaCaptureInitializationSettings() { SharingMode = MediaCaptureSharingMode.SharedReadOnly, VideoDeviceId = deviceId });
@@ -533,7 +533,7 @@ namespace MTCSTLKiosk
 
             
                 Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ComputerVisionClient visionClient = new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ComputerVisionClient(
-                    new ApiKeyServiceClientCredentials(settings.VisionKey),
+                    new ApiKeyServiceClientCredentials(settings.ComputerVisionKey),
                     new System.Net.Http.DelegatingHandler[] { });
 
                 // Create a prediction endpoint, passing in the obtained prediction key
@@ -548,8 +548,8 @@ namespace MTCSTLKiosk
                     new System.Net.Http.DelegatingHandler[] { });
 
 
-                visionClient.Endpoint = $"https://{settings.VisionRegion}.api.cognitive.microsoft.com";
-                faceClient.Endpoint = $"https://{settings.FaceRegion}.api.cognitive.microsoft.com";
+                visionClient.Endpoint = settings.ComputerVisionEndpoint;
+                faceClient.Endpoint = settings.FaceEndpoint;
 
                 List<VisualFeatureTypes> features =
                         new List<VisualFeatureTypes>()
