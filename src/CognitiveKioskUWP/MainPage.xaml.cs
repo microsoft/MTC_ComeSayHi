@@ -348,7 +348,7 @@ namespace MTCSTLKiosk
 
         bool isTranslationListening = false;
         TaskCompletionSource<int> translationStopRecognition;
-        Dictionary<string, string> textLanguges = new Dictionary<string, string>() { { "es", "Spanish" }, { "zh-Hans", "Chinese" }, { "fr", "French" }, { "tlh", "Klingon" } };
+        Dictionary<string, string> textLanguges = new Dictionary<string, string>() { { "es", "Spanish" }, { "zh-Hans", "Chinese" }, { "fr", "French" } };
         private async Task StartSpeechTranslation()
         {
             try
@@ -533,26 +533,31 @@ namespace MTCSTLKiosk
 
             
                 Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ComputerVisionClient visionClient = new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ComputerVisionClient(
-                    new ApiKeyServiceClientCredentials(settings.ComputerVisionKey),
+                    new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ApiKeyServiceClientCredentials(settings.ComputerVisionKey),
                     new System.Net.Http.DelegatingHandler[] { });
 
                 // Create a prediction endpoint, passing in the obtained prediction key
-                CustomVisionPredictionClient customVisionClient = new CustomVisionPredictionClient()
+                CustomVisionPredictionClient customVisionClient = null;
+
+                if (!string.IsNullOrEmpty(settings.CustomVisionKey))
                 {
-                    ApiKey = settings.CustomVisionKey,
-                    Endpoint = $"https://{settings.CustomVisionRegion}.api.cognitive.microsoft.com"
-                };
+                    customVisionClient = new CustomVisionPredictionClient(new Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction.ApiKeyServiceClientCredentials(settings.CustomVisionKey), new System.Net.Http.DelegatingHandler[] { })
+                    {
+                        Endpoint = $"https://{settings.CustomVisionRegion}.api.cognitive.microsoft.com"
+                    };
+                }
 
                 Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient faceClient = new Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient(
-                    new ApiKeyServiceClientCredentials(settings.FaceKey),
+                    new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ApiKeyServiceClientCredentials(settings.FaceKey),
                     new System.Net.Http.DelegatingHandler[] { });
+                
 
 
                 visionClient.Endpoint = settings.ComputerVisionEndpoint;
                 faceClient.Endpoint = settings.FaceEndpoint;
 
-                List<VisualFeatureTypes> features =
-                        new List<VisualFeatureTypes>()
+                List<Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models.VisualFeatureTypes?> features =
+                        new List<VisualFeatureTypes?>()
                     {
                     VisualFeatureTypes.Categories, VisualFeatureTypes.Description,
                     VisualFeatureTypes.Tags, VisualFeatureTypes.Faces, VisualFeatureTypes.Brands
@@ -579,7 +584,8 @@ namespace MTCSTLKiosk
 
                             try
                             {
-                                analysisCV = await customVisionClient.DetectImageWithNoStoreAsync(new Guid(settings.CustomVisionProjectId), settings.CustomVisionIterationName, await imageStreamCallback());
+                                if(customVisionClient != null)
+                                    analysisCV = await customVisionClient.DetectImageWithNoStoreAsync(new Guid(settings.CustomVisionProjectId), settings.CustomVisionIterationName, await imageStreamCallback());
 
                             }
                             catch (Exception)

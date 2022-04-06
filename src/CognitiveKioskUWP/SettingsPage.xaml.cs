@@ -84,7 +84,7 @@ namespace MTCSTLKiosk
             {
                 groupsLoading = true;
                 Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient faceClient = new Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient(
-                    new ApiKeyServiceClientCredentials(settings.FaceKey),
+                    new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ApiKeyServiceClientCredentials(settings.FaceKey),
                     new System.Net.Http.DelegatingHandler[] { });
 
                 faceClient.Endpoint = settings.FaceEndpoint;
@@ -116,7 +116,7 @@ namespace MTCSTLKiosk
             {
 
                 Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient faceClient = new Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient(
-                    new ApiKeyServiceClientCredentials(settings.FaceKey),
+                    new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ApiKeyServiceClientCredentials(settings.FaceKey),
                     new System.Net.Http.DelegatingHandler[] { });
 
                 faceClient.Endpoint = settings.FaceEndpoint;
@@ -145,7 +145,7 @@ namespace MTCSTLKiosk
             {
 
                 Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient faceClient = new Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient(
-                    new ApiKeyServiceClientCredentials(settings.FaceKey),
+                    new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ApiKeyServiceClientCredentials(settings.FaceKey),
                     new System.Net.Http.DelegatingHandler[] { });
 
                 faceClient.Endpoint = settings.FaceEndpoint;
@@ -171,7 +171,7 @@ namespace MTCSTLKiosk
             {
 
                 Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient faceClient = new Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient(
-                    new ApiKeyServiceClientCredentials(settings.FaceKey),
+                    new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ApiKeyServiceClientCredentials(settings.FaceKey),
                     new System.Net.Http.DelegatingHandler[] { });
 
                 faceClient.Endpoint = settings.FaceEndpoint;
@@ -290,7 +290,7 @@ namespace MTCSTLKiosk
                 {
 
                     Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient faceClient = new Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient(
-                        new ApiKeyServiceClientCredentials(settings.FaceKey),
+                        new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ApiKeyServiceClientCredentials(settings.FaceKey),
                         new System.Net.Http.DelegatingHandler[] { });
 
                     faceClient.Endpoint = settings.FaceEndpoint;
