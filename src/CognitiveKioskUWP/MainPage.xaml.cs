@@ -568,7 +568,7 @@ namespace MTCSTLKiosk
                     {
             FaceAttributeType.Gender, FaceAttributeType.Age,
             FaceAttributeType.Smile, FaceAttributeType.Emotion,
-            FaceAttributeType.Glasses, FaceAttributeType.Hair
+            FaceAttributeType.Glasses, FaceAttributeType.Hair, FaceAttributeType.Accessories
                     };
 
                 try

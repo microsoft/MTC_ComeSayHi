@@ -148,7 +148,12 @@ namespace MTCSTLKiosk.Controls
                             if (face.FaceAttributes.Hair.HairColor.Count > 0)
                                 hair = face.FaceAttributes.Hair.HairColor.First().Color.ToString();
                         }
-                        string userInfo = $"Emotion: {choosenEmotion} \nGlasses: {face.FaceAttributes.Glasses.ToString()} \nSmile: {face.FaceAttributes.Smile.ToString()} \nHair: {hair} ";
+                        string mask = "n/a";
+                        if(face.FaceAttributes.Accessories != null)
+                        {
+                            mask = (face.FaceAttributes.Accessories.Count(x=>x.Type == Microsoft.Azure.CognitiveServices.Vision.Face.Models.AccessoryType.Mask) > 0).ToString();
+                        }
+                        string userInfo = $"Emotion: {choosenEmotion} \nGlasses: {face.FaceAttributes.Glasses.ToString()} \nSmile: {face.FaceAttributes.Smile.ToString()} \nHair: {hair} \nMask: {mask} ";
 
                         AgeControl ageControl = null;
 

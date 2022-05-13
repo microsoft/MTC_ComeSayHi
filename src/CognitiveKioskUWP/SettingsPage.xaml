@@ -44,7 +44,7 @@
                     <TextBox x:Name="textVisionAPIKey" Text="" Margin="5" Width="400px" TextChanged="textVisionAPIKey_TextChanged" HorizontalAlignment="Left" />
                 </StackPanel>
                 <StackPanel Margin="0,10,0,0">
-                    <TextBlock Text="Vision Region" Margin="5" ></TextBlock>
+                    <TextBlock Text="Vision URL (https://***.api.cognitive.microsoft.com/sts/v1.0/issuetoken)" Margin="5" ></TextBlock>
                     <TextBox x:Name="textComputerVisionEndpoint" Text="" Margin="5" Width="400px"  HorizontalAlignment="Left" TextChanged="TextComputerVisionEndpoint_TextChanged" />
                 </StackPanel>
                 <StackPanel Margin="0,10,0,0">
@@ -52,7 +52,7 @@
                     <TextBox x:Name="textFaceAPIKey" Text="" Margin="5" Width="400px" TextChanged="textFaceAPIKey_TextChanged" HorizontalAlignment="Left" />
                 </StackPanel>
                 <StackPanel Margin="0,10,0,0">
-                    <TextBlock Text="Face Region"   Margin="5"></TextBlock>
+                    <TextBlock Text="Face URL (https://***.api.cognitive.microsoft.com/sts/v1.0/issuetoken)"   Margin="5"></TextBlock>
                     <TextBox x:Name="textFaceEndPoint" Text="" Margin="5" Width="400px"  HorizontalAlignment="Left" TextChanged="TextFaceEndPoint_TextChanged" />
                 </StackPanel>
 
