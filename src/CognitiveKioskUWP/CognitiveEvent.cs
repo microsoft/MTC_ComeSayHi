@@ -20,6 +20,8 @@ namespace MTCSTLKiosk
         public string PrimarySpeechMessageFinal { get; set; }
         public string SecondarySpeechMessageFinal { get; set; }
 
+        public ConversationMessage PrimaryConversationMessageFinal { get; set; }
+
         public System.Collections.Generic.IList<Microsoft.Azure.CognitiveServices.Vision.Face.Models.DetectedFace> Faces = new List<Microsoft.Azure.CognitiveServices.Vision.Face.Models.DetectedFace>();
         public int ImageHeight { get; set; }
         public int ImageWidth { get; set; }

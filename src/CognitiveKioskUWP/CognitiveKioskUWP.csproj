@@ -116,6 +116,9 @@
     <Compile Include="Controls\Captions.xaml.cs">
       <DependentUpon>Captions.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Conversation.xaml.cs">
+      <DependentUpon>Conversation.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Faces.xaml.cs">
       <DependentUpon>Faces.xaml</DependentUpon>
     </Compile>
@@ -129,6 +132,7 @@
     <Compile Include="Controls\Tags.xaml.cs">
       <DependentUpon>Tags.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ConversationMessage.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
@@ -163,6 +167,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\Captions.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Conversation.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

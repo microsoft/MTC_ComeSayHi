@@ -36,59 +36,14 @@ namespace MTCSTLKiosk
         private string emojiNeutral = char.ConvertFromUtf32(0x1f610);
         private string emojiSuprise = char.ConvertFromUtf32(0x1f632);
 
-        public void SetUserInfo(int number, string sex, double? age, string  emotion)
+        public void SetUserInfo(int number)
         {
+            gridAgeIncluded.Visibility = Visibility.Collapsed;
+            gridEmoji.Visibility = Visibility.Visible;
 
-            if (settings.ShowAgeAndGender)
-            {
-                gridEmoji.Visibility = Visibility.Collapsed;
-                gridAgeIncluded.Visibility = Visibility.Visible;
-
-                this.Height = 25;
-                this.Width = 120;
-
-                textUser.Text = sex + " (" + age.ToString() + ")";
-            }
-            else
-            {
-                gridAgeIncluded.Visibility = Visibility.Collapsed;
-                gridEmoji.Visibility = Visibility.Visible;
-
-                textUser.Text = emotion;
-            }
-
-            if (emotion == "Anger")
-            {
-                textSymbol.Text = emojiAnger;
-            }
-            if (emotion == "Contempt")
-            {
-                textSymbol.Text = emojiContempt;
-            }
-            if (emotion == "Disgust")
-            {
-                textSymbol.Text = emojiDisgust;
-            }
-            if (emotion == "Fear")
-            {
-                textSymbol.Text = emojiFear;
-            }
-            if (emotion == "Happiness")
-            {
-                textSymbol.Text = emojiHappiness;
-            }
-            if (emotion == "Neutral")
-            {
-                textSymbol.Text = emojiNeutral;
-            }
-            if (emotion == "Sadness")
-            {
-                textSymbol.Text = emojiSad;
-            }
-            if (emotion == "Surprise")
-            {
-                textSymbol.Text = emojiSuprise;
-            }
+            textUser.Text = "";
+            textSymbol.Text = emojiHappiness;
+            
 
             textSymbol2.Text = textSymbol.Text;
 

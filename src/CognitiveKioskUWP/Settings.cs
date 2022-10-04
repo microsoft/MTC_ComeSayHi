@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Devices.Enumeration;
 
 namespace MTCSTLKiosk
 {
@@ -20,6 +21,12 @@ namespace MTCSTLKiosk
         }
 
 
+        public async Task<bool> HasKinect()
+        {
+            var devices = await DeviceInformation.FindAllAsync(DeviceClass.AudioCapture);
+
+            return devices.Any(x => x.Name.Contains("Kinect"));
+        }
         public static Settings SingletonInstance
         {
             get

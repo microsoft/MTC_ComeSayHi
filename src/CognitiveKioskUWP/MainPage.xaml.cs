@@ -6,6 +6,8 @@ using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction;
 using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction.Models;
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
+using Microsoft.CognitiveServices.Speech.Transcription;
 using Microsoft.CognitiveServices.Speech.Translation;
 using System;
 using System.Collections.Generic;
@@ -265,7 +267,8 @@ namespace MTCSTLKiosk
                 captionsControl.MainCapture.Source = mediaCapture;
                 speechControl.MainCapture.Source = mediaCapture2;
                 tagsControl.MainCapture.Source = mediaCapture3;
-                facesControl.MainCapture.Source = mediaCapture4;
+                //facesControl.MainCapture.Source = mediaCapture4;
+               conversationControl.MainCapture.Source = mediaCapture4;
                 await mediaCapture.StartPreviewAsync();
                 await mediaCapture2.StartPreviewAsync();
                 await mediaCapture3.StartPreviewAsync();
@@ -289,7 +292,7 @@ namespace MTCSTLKiosk
                     {
                         Analytics.TrackEvent("Faces found, starting capture");
                         isFaceFound = true;
-                        await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
+                        await Dispatcher.RunAsync(CoreDispatcherPriority.Normal,  async () =>
                         {
                             timerFace.Stop();
                             timerFace.Start();
@@ -312,14 +315,26 @@ namespace MTCSTLKiosk
         private async Task ActivateUI()
         {
             tagsControl.Visibility = Visibility.Visible;
-            facesControl.Visibility = Visibility.Visible;
+            if (await settings.HasKinect())
+            {
+                conversationControl.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                facesControl.Visibility = Visibility.Visible;
+            }
             captionsControl.Visibility = Visibility.Visible;
             speechControl.Visibility = Visibility.Visible;
             timerTakePicture.Start();
             UpdateTranslationUI($"Warming Up Translation", "");
             try
             {
-                await StartSpeechTranslation();
+                _ = Task.Factory.StartNew(StartSpeechTranslation);
+
+                if (await settings.HasKinect())
+                {
+                    _ = Task.Factory.StartNew(StartSpeechConversation);
+                }
 
             }
             catch (Exception)
@@ -333,6 +348,7 @@ namespace MTCSTLKiosk
             tagsControl.Visibility = Visibility.Collapsed;
             facesControl.Visibility = Visibility.Collapsed;
             captionsControl.Visibility = Visibility.Collapsed;
+            conversationControl.Visibility = Visibility.Collapsed;
             speechControl.Visibility = Visibility.Collapsed;
             speechControl.UpdateEvent(new CognitiveEvent() { ClearData = true });
             if (timerTakePicture != null)
@@ -341,6 +357,7 @@ namespace MTCSTLKiosk
                 timerFace.Stop();
             isFaceFound = false;
             StopSpeechTranslation();
+            StopSpeechConversation();
 
         }
 
@@ -478,6 +495,164 @@ namespace MTCSTLKiosk
 
         #endregion
 
+
+
+        #region Speech Conversation
+
+        bool isConversationListening = false;
+        TaskCompletionSource<int> conversationStopRecognition;
+
+        private async Task StartSpeechConversation()
+        {
+            try
+            {
+                if (isConversationListening || string.IsNullOrEmpty(settings.SpeechKey))
+                    return;
+
+                isConversationListening = true;
+
+                conversationStopRecognition = new TaskCompletionSource<int>();
+                var subscriptionKey = settings.SpeechKey;
+                var region = settings.SpeechRegion;
+
+                var config = SpeechConfig.FromSubscription(subscriptionKey, region);
+                config.SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
+                config.SetProperty("DifferentiateGuestSpeakers", "true");
+                //StorageFolder storageFolder = ApplicationData.Current.LocalFolder;
+                //StorageFile logFile = await storageFolder.CreateFileAsync("logfile.txt", CreationCollisionOption.ReplaceExisting);
+                //config.SetProperty(PropertyId.Speech_LogFilename, logFile.Path);
+
+                // en-us by default. Adding this code to specify other languages, like zh-cn.
+                // config.SpeechRecognitionLanguage = "zh-cn";
+                config.SpeechRecognitionLanguage = "en-us";
+
+                Debug.WriteLine($"Starting");
+                MicrophoneCoordinates[] microphoneCoordinates = new MicrophoneCoordinates[7]
+                {
+                new MicrophoneCoordinates(0, 0, 0),
+                new MicrophoneCoordinates(40, 0, 0),
+                new MicrophoneCoordinates(20, -35, 0),
+                new MicrophoneCoordinates(-20, -35, 0),
+                new MicrophoneCoordinates(-40, 0, 0),
+                new MicrophoneCoordinates(-20, 35, 0),
+                new MicrophoneCoordinates(20, 35, 0)
+                };
+                var microphoneArrayGeometry = new MicrophoneArrayGeometry(MicrophoneArrayType.Planar, microphoneCoordinates);
+                var audioProcessingOptions = AudioProcessingOptions.Create(AudioProcessingConstants.AUDIO_INPUT_PROCESSING_ENABLE_DEFAULT, microphoneArrayGeometry);
+                var devices = await DeviceInformation.FindAllAsync(DeviceClass.AudioCapture);
+                var name = devices.FirstOrDefault(x => x.Name.Contains("Kinect")).Properties.GetValueOrDefault("System.Devices.DeviceInstanceId").ToString();
+
+                using (var audioInput = AudioConfig.FromMicrophoneInput(name.Substring(13), audioProcessingOptions))
+                {
+                    var meetingID = Guid.NewGuid().ToString();
+
+                    using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
+                    {
+                        // create a conversation transcriber using audio stream input
+                        using (var conversationTranscriber = new ConversationTranscriber(audioInput))
+                        {
+                            conversationTranscriber.Transcribing += (s, e) =>
+                            {
+                                //Debug.WriteLine($"TRANSCRIBING: Text={e.Result.Text} SpeakerId={e.Result.UserId}");
+                            };
+
+                            conversationTranscriber.Transcribed += (s, e) =>
+                            {
+
+                                try
+                                {
+                                    //Debug.WriteLine($"Message received {e.Result.Text}");
+                                    UpdateConversationFinalUI(e.Result.Text, e.Result.UserId);
+
+                                }
+                                catch (Exception)
+                                {
+                                    // let it go
+                                }
+
+                                //if (e.Result.Text.ToLower().Contains("stop"))
+                                //{
+                                //    conversationStopRecognition.TrySetResult(0);
+                                //}
+                            };
+
+                            conversationTranscriber.Canceled += (s, e) =>
+                            {
+                                Debug.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                                if (e.Reason == CancellationReason.Error)
+                                {
+                                    Debug.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
+                                    Debug.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                                    Debug.WriteLine($"CANCELED: Did you set the speech resource key and region values?");
+                                    conversationStopRecognition.TrySetResult(0);
+                                }
+                            };
+
+                            conversationTranscriber.SessionStarted += (s, e) =>
+                            {
+                                Debug.WriteLine($"\nSession started event. SessionId={e.SessionId}");
+                            };
+
+                            conversationTranscriber.SessionStopped += (s, e) =>
+                            {
+                                Debug.WriteLine($"\nSession stopped event. SessionId={e.SessionId}");
+                                Debug.WriteLine("\nStop recognition.");
+                                conversationStopRecognition.TrySetResult(0);
+                            };
+
+                            // Add participants to the conversation.
+                            //var speaker1 = Participant.From("User1", "en-US", voiceSignatureStringUser1);
+                            //var speaker2 = Participant.From("User2", "en-US", voiceSignatureStringUser2);
+                            //await conversation.AddParticipantAsync(speaker1);
+                            //await conversation.AddParticipantAsync(speaker2);
+
+                            // Join to the conversation and start transcribing
+                            await conversationTranscriber.JoinConversationAsync(conversation);
+                            await conversationTranscriber.StartTranscribingAsync().ConfigureAwait(false);
+
+                            // waits for completion, then stop transcription
+                            Task.WaitAny(new[] { conversationStopRecognition.Task });
+                            await conversationTranscriber.StopTranscribingAsync().ConfigureAwait(false);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Exception caught let it go!
+            }
+
+
+        }
+
+        private void StopSpeechConversation()
+        {
+            if (conversationStopRecognition != null)
+                conversationStopRecognition.TrySetResult(0);
+
+        }
+
+        private void UpdateConversationFinalUI(string messageOriginal, string guest)
+        {
+            if (Dispatcher.HasThreadAccess)
+            {
+                conversationControl.UpdateEvent(new CognitiveEvent() { PrimaryConversationMessageFinal = new ConversationMessage() { Message = messageOriginal, User = guest } });
+
+            }
+            else
+            {
+
+                var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    {
+                        conversationControl.UpdateEvent(new CognitiveEvent() { PrimaryConversationMessageFinal = new ConversationMessage() { Message = messageOriginal, User = guest } });
+
+                    });
+            }
+        }
+
+        #endregion
+
         #region Computer Vision
 
         private async Task<SoftwareBitmap> TakeImage()
@@ -547,6 +722,7 @@ namespace MTCSTLKiosk
                     };
                 }
 
+
                 Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient faceClient = new Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient(
                     new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ApiKeyServiceClientCredentials(settings.FaceKey),
                     new System.Net.Http.DelegatingHandler[] { });
@@ -566,9 +742,7 @@ namespace MTCSTLKiosk
                 IList<FaceAttributeType> faceAttributes =
                     new FaceAttributeType[]
                     {
-            FaceAttributeType.Gender, FaceAttributeType.Age,
-            FaceAttributeType.Smile, FaceAttributeType.Emotion,
-            FaceAttributeType.Glasses, FaceAttributeType.Hair, FaceAttributeType.Accessories
+            FaceAttributeType.HeadPose
                     };
 
                 try

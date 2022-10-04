@@ -35,9 +35,13 @@
             <TextBlock HorizontalAlignment="Center" Text="HI" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Bold" FontSize="150" Foreground="White" />
             <Custom:Tags x:Name="tagsControl"  Tapped="Settings_Tapped" />
         </Grid>
-        <Grid Background="#ffb900" Grid.Row="1" Grid.Column="1">
+        <Grid Background="#ffb900" Grid.Row="1" Grid.Column="1" >
             <TextBlock HorizontalAlignment="Center" Text="&#xEB68;" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Bold" FontSize="150" Foreground="White" FontFamily="Segoe MDL2 Assets" />
             <Custom:Faces x:Name="facesControl"  Tapped="Settings_Tapped" />
+        </Grid>
+        <Grid Background="#ffb900" Grid.Row="1" Grid.Column="1">
+            <TextBlock HorizontalAlignment="Center" Text="&#xEB68;" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Bold" FontSize="150" Foreground="White" FontFamily="Segoe MDL2 Assets" />
+            <Custom:Conversation x:Name="conversationControl"  Tapped="Settings_Tapped" />
         </Grid>
         <Border x:Name="borderInfo"  Margin="0" Height="200" VerticalAlignment="Center" BorderBrush="White" BorderThickness="0" Grid.RowSpan="2" Grid.ColumnSpan="2" HorizontalAlignment="Center">
             <Grid Tapped="Settings_Tapped" IsHitTestVisible="True" Background="{ThemeResource SystemControlAcrylicElementBrush}">
