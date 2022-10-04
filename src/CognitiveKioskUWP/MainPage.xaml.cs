@@ -267,8 +267,10 @@ namespace MTCSTLKiosk
                 captionsControl.MainCapture.Source = mediaCapture;
                 speechControl.MainCapture.Source = mediaCapture2;
                 tagsControl.MainCapture.Source = mediaCapture3;
-                //facesControl.MainCapture.Source = mediaCapture4;
-               conversationControl.MainCapture.Source = mediaCapture4;
+                if (await settings.HasKinect())
+                    conversationControl.MainCapture.Source = mediaCapture4;
+                else
+                    facesControl.MainCapture.Source = mediaCapture4;
                 await mediaCapture.StartPreviewAsync();
                 await mediaCapture2.StartPreviewAsync();
                 await mediaCapture3.StartPreviewAsync();

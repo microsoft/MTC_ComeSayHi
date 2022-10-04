@@ -87,10 +87,6 @@
                     <TextBlock Text="Custom Vision Frames Per Minute" Margin="5" ></TextBlock>
                     <TextBox x:Name="textFramesPerMinute" Text="" Margin="5" Width="40px"  HorizontalAlignment="Left" TextChanged="TextFramesPerMinute_TextChanged"  />
                 </StackPanel>
-                <StackPanel Margin="0,10,0,0">
-                    <TextBlock Text="Show age and gender (WARNING this is not recommended due to current MS policy)" Margin="5" ></TextBlock>
-                    <ToggleSwitch x:Name="toggleShowAge"  Margin="5" Toggled="ToggleShowAge_Toggled" />
-                </StackPanel>
                 <TextBlock Text="Hardware" 
                     Style="{StaticResource TitleTextBlockStyle}"
                     Margin="0,40,0,0"

@@ -62,7 +62,6 @@ namespace MTCSTLKiosk
             dropdownRegion.SelectedValue = settings.SpeechRegion;
             dropdownCustomVisionRegion.SelectedValue = settings.CustomVisionRegion;
 
-            toggleShowAge.IsOn = settings.ShowAgeAndGender;
             toggleFaceDetect.IsOn = settings.DoFaceDetection;
 
 
@@ -250,11 +249,6 @@ namespace MTCSTLKiosk
             await Launcher.LaunchUriAsync(mailtoUri);
         }
 
-        private void ToggleShowAge_Toggled(object sender, RoutedEventArgs e)
-        {
-
-            settings.ShowAgeAndGender = toggleShowAge.IsOn;
-        }
 
         private async void ButtonAddPerson_Click(object sender, RoutedEventArgs e)
         {

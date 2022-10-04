@@ -51,17 +51,6 @@ namespace MTCSTLKiosk
             set { localSettings.Values["CameraKey"] = value; }
         }
 
-        public bool ShowAgeAndGender
-        {
-            get
-            {
-                if (localSettings.Values.ContainsKey("ShowAgeAndGender"))
-                    return (bool)localSettings.Values["ShowAgeAndGender"];
-                else
-                    return false;
-            }
-            set { localSettings.Values["ShowAgeAndGender"] = value; }
-        }
 
         public bool DoFaceDetection
         {
