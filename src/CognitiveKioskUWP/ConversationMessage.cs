@@ -10,5 +10,6 @@ namespace MTCSTLKiosk
     {
         public string User { get; set; }
         public string Message { get; set; }
+        public string ConvoId { get; set; }
     }
 }

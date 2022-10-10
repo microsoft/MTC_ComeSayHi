@@ -564,7 +564,7 @@ namespace MTCSTLKiosk
                                 try
                                 {
                                     //Debug.WriteLine($"Message received {e.Result.Text}");
-                                    UpdateConversationFinalUI(e.Result.Text, e.Result.UserId);
+                                    UpdateConversationFinalUI(e.Result.Text, e.Result.UserId, meetingID);
 
                                 }
                                 catch (Exception)
@@ -635,7 +635,7 @@ namespace MTCSTLKiosk
 
         }
 
-        private void UpdateConversationFinalUI(string messageOriginal, string guest)
+        private void UpdateConversationFinalUI(string messageOriginal, string guest, string convo)
         {
             if (Dispatcher.HasThreadAccess)
             {

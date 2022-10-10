@@ -25,7 +25,7 @@ namespace MTCSTLKiosk
         {
             var devices = await DeviceInformation.FindAllAsync(DeviceClass.AudioCapture);
 
-            return devices.Any(x => x.Name.Contains("Kinect"));
+            return devices.Any(x => x.Name.Contains("Kinect")) && DoConversations;
         }
         public static Settings SingletonInstance
         {
@@ -49,6 +49,20 @@ namespace MTCSTLKiosk
                     return string.Empty;
             }
             set { localSettings.Values["CameraKey"] = value; }
+        }
+
+
+
+        public bool DoConversations
+        {
+            get
+            {
+                if (localSettings.Values.ContainsKey("DoConversations"))
+                    return (bool)localSettings.Values["DoConversations"];
+                else
+                    return false;
+            }
+            set { localSettings.Values["DoConversations"] = value; }
         }
 
 

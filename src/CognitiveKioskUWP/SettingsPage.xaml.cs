@@ -63,6 +63,7 @@ namespace MTCSTLKiosk
             dropdownCustomVisionRegion.SelectedValue = settings.CustomVisionRegion;
 
             toggleFaceDetect.IsOn = settings.DoFaceDetection;
+            toggleConversations.IsOn = settings.DoFaceDetection;
 
 
             var devices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
@@ -401,6 +402,11 @@ namespace MTCSTLKiosk
         private void TextComputerVisionEndpoint_TextChanged(object sender, TextChangedEventArgs e)
         {
             settings.ComputerVisionEndpoint = textComputerVisionEndpoint.Text;
+        }
+
+        private void toggleConversations_Toggled(object sender, RoutedEventArgs e)
+        {
+            settings.DoConversations = toggleConversations.IsOn;
         }
     }
 }

@@ -23,10 +23,16 @@ namespace MTCSTLKiosk.Controls
 {
     public sealed partial class Conversation : UserControl, IQuarterControl
     {
-        Color[] myColors = { Colors.Aqua, Colors.SeaGreen, Colors.DarkMagenta, Colors.Khaki, Colors.Tomato };
+        struct PersonStruct
+        {
+             public string name;
+            public Color color;
+        }
+        DateTime lastClear = DateTime.Now;
+        string lastConvo = "";
 
         List<ConversationMessage> conversationMessages = new List<ConversationMessage>();
-        Dictionary<string, string> mappingName = new Dictionary<string, string>();
+        Dictionary<string, PersonStruct> mappingName = new Dictionary<string, PersonStruct>();
         public Conversation()
         {
             this.InitializeComponent();
@@ -42,6 +48,13 @@ namespace MTCSTLKiosk.Controls
             conversationMessages.Add(mainEvent.PrimaryConversationMessageFinal);
             var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
             {
+                if(lastConvo != mainEvent.PrimaryConversationMessageFinal.ConvoId)
+                {
+                    lastConvo = mainEvent.PrimaryConversationMessageFinal.ConvoId;
+                    textStack.Children.Clear();
+                    conversationMessages.Clear();
+
+                }
                 if (mainEvent.PrimaryConversationMessageFinal.User != "Unidentified" && mainEvent.PrimaryConversationMessageFinal.Message.ToLower().Contains("my name is"))
                 {
                     //textTranscript.Text = "";
@@ -57,7 +70,7 @@ namespace MTCSTLKiosk.Controls
                     if (mappingName.ContainsKey(mainEvent.PrimaryConversationMessageFinal.User))
                         mappingName.Remove(mainEvent.PrimaryConversationMessageFinal.User);
 
-                    mappingName.Add(mainEvent.PrimaryConversationMessageFinal.User, name);
+                    mappingName.Add(mainEvent.PrimaryConversationMessageFinal.User, new PersonStruct() { name = name, color=GetRandomColor()});
                     foreach (var message in conversationMessages)
                     {
                         WriteNewMessage(message);
@@ -69,6 +82,12 @@ namespace MTCSTLKiosk.Controls
                 }
             });
         }
+        private Color GetRandomColor()
+        {
+            Random rand = new Random();
+
+            return Color.FromArgb(255, (byte)rand.Next(190, 255), (byte)rand.Next(190, 255), (byte)rand.Next(190, 255));
+        }
 
         private void WriteNewMessage(ConversationMessage message)
         {
@@ -78,26 +97,28 @@ namespace MTCSTLKiosk.Controls
             tb.FontWeight = FontWeights.Bold;
             tb.Foreground = GetColor(message.User);
             tb.Padding = new Thickness(0, 0, 0, 10); 
+            tb.TextWrapping = TextWrapping.Wrap;
+            tb.HorizontalAlignment = HorizontalAlignment.Stretch;
             textStack.Children.Insert(0, tb);
         }
 
         private Brush GetColor(string name)
         {
 
-            if (mappingName.ContainsKey(name))
+            if (mappingName.ContainsKey(name) && mappingName[name].name.Length > 0)
             {
-                var firstnum = (int)mappingName[name].First();
-                firstnum = firstnum % myColors.Length;
-                return new SolidColorBrush(myColors[firstnum]);
+
+                return new SolidColorBrush(mappingName[name].color);
             }
             else
                 return new SolidColorBrush(Colors.White);
         }
+                
 
         private string MakeMessage (ConversationMessage message)
         {
             if (mappingName.ContainsKey(message.User))
-                return $"{mappingName[message.User]} - {message.Message}";
+                return $"{mappingName[message.User].name} - {message.Message}";
             else
                 return $"{message.User} - {message.Message}";
         }
