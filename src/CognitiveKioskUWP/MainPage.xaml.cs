@@ -587,6 +587,7 @@ namespace MTCSTLKiosk
                                     Debug.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
                                     Debug.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
                                     Debug.WriteLine($"CANCELED: Did you set the speech resource key and region values?");
+                                    isConversationListening = false;
                                     conversationStopRecognition.TrySetResult(0);
                                 }
                             };
@@ -600,6 +601,7 @@ namespace MTCSTLKiosk
                             {
                                 Debug.WriteLine($"\nSession stopped event. SessionId={e.SessionId}");
                                 Debug.WriteLine("\nStop recognition.");
+                                isConversationListening = false;
                                 conversationStopRecognition.TrySetResult(0);
                             };
 
@@ -615,6 +617,7 @@ namespace MTCSTLKiosk
 
                             // waits for completion, then stop transcription
                             Task.WaitAny(new[] { conversationStopRecognition.Task });
+                            isConversationListening = false;
                             await conversationTranscriber.StopTranscribingAsync().ConfigureAwait(false);
                         }
                     }
@@ -631,7 +634,10 @@ namespace MTCSTLKiosk
         private void StopSpeechConversation()
         {
             if (conversationStopRecognition != null)
+            {
                 conversationStopRecognition.TrySetResult(0);
+                UpdateConversationFinalUI("", "", "");
+            }
 
         }
 
