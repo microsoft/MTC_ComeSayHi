@@ -52,6 +52,7 @@ namespace MTCSTLKiosk.Controls
                     lastConvo = mainEvent.PrimaryConversationMessageFinal.ConvoId;
                     textStack.Children.Clear();
                     conversationMessages.Clear();
+                    mappingName.Clear();
 
                 }
                 conversationMessages.Add(mainEvent.PrimaryConversationMessageFinal);
