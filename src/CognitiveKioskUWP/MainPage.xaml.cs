@@ -520,6 +520,9 @@ namespace MTCSTLKiosk
                 var config = SpeechConfig.FromSubscription(subscriptionKey, region);
                 config.SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
                 config.SetProperty("DifferentiateGuestSpeakers", "true");
+                config.SetProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "45000");
+                config.SetProperty(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, "45000");
+                config.SetProperty(PropertyId.Conversation_Initial_Silence_Timeout, "45000");
                 //StorageFolder storageFolder = ApplicationData.Current.LocalFolder;
                 //StorageFile logFile = await storageFolder.CreateFileAsync("logfile.txt", CreationCollisionOption.ReplaceExisting);
                 //config.SetProperty(PropertyId.Speech_LogFilename, logFile.Path);
@@ -547,6 +550,7 @@ namespace MTCSTLKiosk
                 using (var audioInput = AudioConfig.FromMicrophoneInput(name.Substring(13), audioProcessingOptions))
                 {
                     var meetingID = Guid.NewGuid().ToString();
+                    UpdateConversationFinalUI("Session started", "", meetingID);
 
                     using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
                     {
@@ -618,6 +622,7 @@ namespace MTCSTLKiosk
                             // waits for completion, then stop transcription
                             Task.WaitAny(new[] { conversationStopRecognition.Task });
                             isConversationListening = false;
+                            UpdateConversationFinalUI("Session ended", "", "");
                             await conversationTranscriber.StopTranscribingAsync().ConfigureAwait(false);
                         }
                     }
@@ -636,7 +641,6 @@ namespace MTCSTLKiosk
             if (conversationStopRecognition != null)
             {
                 conversationStopRecognition.TrySetResult(0);
-                UpdateConversationFinalUI("", "", "");
             }
 
         }
@@ -645,7 +649,7 @@ namespace MTCSTLKiosk
         {
             if (Dispatcher.HasThreadAccess)
             {
-                conversationControl.UpdateEvent(new CognitiveEvent() { PrimaryConversationMessageFinal = new ConversationMessage() { Message = messageOriginal, User = guest } });
+                conversationControl.UpdateEvent(new CognitiveEvent() { PrimaryConversationMessageFinal = new ConversationMessage() { Message = messageOriginal, User = guest, ConvoId = convo } });
 
             }
             else
@@ -653,7 +657,7 @@ namespace MTCSTLKiosk
 
                 var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                     {
-                        conversationControl.UpdateEvent(new CognitiveEvent() { PrimaryConversationMessageFinal = new ConversationMessage() { Message = messageOriginal, User = guest } });
+                        conversationControl.UpdateEvent(new CognitiveEvent() { PrimaryConversationMessageFinal = new ConversationMessage() { Message = messageOriginal, User = guest, ConvoId = convo } });
 
                     });
             }

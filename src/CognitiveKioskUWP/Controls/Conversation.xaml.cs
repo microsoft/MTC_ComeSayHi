@@ -45,7 +45,6 @@ namespace MTCSTLKiosk.Controls
             if(mainEvent == null || string.IsNullOrEmpty(mainEvent.PrimaryConversationMessageFinal.Message.Trim()))
                 return;
 
-            conversationMessages.Add(mainEvent.PrimaryConversationMessageFinal);
             var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
             {
                 if(lastConvo != mainEvent.PrimaryConversationMessageFinal.ConvoId)
@@ -55,6 +54,7 @@ namespace MTCSTLKiosk.Controls
                     conversationMessages.Clear();
 
                 }
+                conversationMessages.Add(mainEvent.PrimaryConversationMessageFinal);
                 if (mainEvent.PrimaryConversationMessageFinal.User != "Unidentified" && mainEvent.PrimaryConversationMessageFinal.Message.ToLower().Contains("my name is"))
                 {
                     //textTranscript.Text = "";

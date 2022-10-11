@@ -95,10 +95,7 @@ namespace MTCSTLKiosk.Controls
 
                         int convertedTop = ((face.FaceRectangle.Top * (int)captureControl.ActualHeight) / mainEvent.ImageHeight) - ((int)captureControl.Margin.Top) - ((int)ageControl1.ActualHeight);
                         int convertedLeft = (((face.FaceRectangle.Left + (face.FaceRectangle.Width / 4)) * (int)captureControl.ActualWidth) / mainEvent.ImageWidth);
-
-                        string choosenEmotion = "Happiness";
-
-                       
+                                               
                         string userInfo = $"Id: {face.FaceId.ToString()}  ";
 
                         AgeControl ageControl = null;
