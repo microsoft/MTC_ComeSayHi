@@ -789,37 +789,12 @@ namespace MTCSTLKiosk
 
 
 
-                    var analysisFace = await faceClient.Face.DetectWithStreamWithHttpMessagesAsync(await imageStreamCallback(), returnFaceId: true, returnFaceAttributes: faceAttributes);
+                    var analysisFace = await faceClient.Face.DetectWithStreamWithHttpMessagesAsync(await imageStreamCallback(), returnFaceId: false, returnFaceAttributes: faceAttributes);
                     imageWidth = image.PixelWidth;
                     imageHeight = image.PixelHeight;
                     facesControl.UpdateEvent(new CognitiveEvent() { Faces = analysisFace.Body, ImageWidth = image.PixelWidth, ImageHeight = image.PixelHeight });
 
-                    if (analysisFace.Body.Count() > 0 && settings.DoFaceDetection)
-                    {
-                        var groups = await faceClient.PersonGroup.ListWithHttpMessagesAsync();
-                        var group = groups.Body.FirstOrDefault(x => x.Name == settings.GroupName);
-                        if (group != null)
-                        {
-                            var results = await faceClient.Face.IdentifyWithHttpMessagesAsync(analysisFace.Body.Select(x => x.FaceId.Value).ToArray(), group.PersonGroupId);
-                            foreach (var identifyResult in results.Body)
-                            {
-                                var cand = identifyResult.Candidates.FirstOrDefault(x => x.Confidence > settings.FaceThreshold / 100d);
-                                if (cand == null)
-                                {
-                                    Console.WriteLine("No one identified");
-                                }
-                                else
-                                {
-                                    // Get top 1 among all candidates returned
-                                    var candidateId = cand.PersonId;
-                                    var person = await faceClient.PersonGroupPerson.GetWithHttpMessagesAsync(group.PersonGroupId, candidateId);
-                                        tagsControl.UpdateEvent(new CognitiveEvent() { IdentifiedPerson = person.Body, IdentifiedPersonPrediction = cand.Confidence });
-                                        Console.WriteLine("Identified as {0}", person.Body.Name);
-                                    }
-                                }
-                            }
-                        }
-                    
+                     
 
                 }
                 catch (Exception)

@@ -56,13 +56,11 @@ namespace MTCSTLKiosk
             textCustomVisionProjectID.Text = settings.CustomVisionProjectId;
             textCustomVisionIterationName.Text = settings.CustomVisionIterationName;
             sliderCustomVision.Value = settings.CustomVisionThreshold;
-            sliderFaceDetect.Value = settings.FaceThreshold;
 
 
             dropdownRegion.SelectedValue = settings.SpeechRegion;
             dropdownCustomVisionRegion.SelectedValue = settings.CustomVisionRegion;
 
-            toggleFaceDetect.IsOn = settings.DoFaceDetection;
             toggleConversations.IsOn = settings.DoFaceDetection;
 
 
@@ -73,123 +71,12 @@ namespace MTCSTLKiosk
             dropdownCamera.SelectedValue = settings.CameraKey;
 
             textSettings.Text = "Settings v." + GetAppVersion();
-            await BindFaces();
         }
 
-        private async System.Threading.Tasks.Task BindFaces()
-        {
-            if (groupsLoading)
-                return;
-            try
-            {
-                groupsLoading = true;
-                Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient faceClient = new Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient(
-                    new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ApiKeyServiceClientCredentials(settings.FaceKey),
-                    new System.Net.Http.DelegatingHandler[] { });
 
-                faceClient.Endpoint = settings.FaceEndpoint;
 
-                var groups = await faceClient.PersonGroup.ListWithHttpMessagesAsync();
-                var group = groups.Body.FirstOrDefault(x => x.Name == settings.GroupName);
 
-                if (group == null)
-                {
-                   var groupRet = await faceClient.PersonGroup.CreateWithHttpMessagesAsync(Guid.NewGuid().ToString(), settings.GroupName);
-                     groups = await faceClient.PersonGroup.ListWithHttpMessagesAsync();
-                     group = groups.Body.FirstOrDefault(x => x.Name == settings.GroupName);
-                }
 
-                var perople = await faceClient.PersonGroupPerson.ListWithHttpMessagesAsync(group.PersonGroupId);
-
-                dropdownPerson.ItemsSource = perople.Body.Select(x => x.Name).ToArray();
-            }
-            catch (Exception)
-            {
-
-            }
-            groupsLoading = false;
-        }
-
-        private async System.Threading.Tasks.Task AddPerson(string person)
-        {
-            try
-            {
-
-                Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient faceClient = new Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient(
-                    new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ApiKeyServiceClientCredentials(settings.FaceKey),
-                    new System.Net.Http.DelegatingHandler[] { });
-
-                faceClient.Endpoint = settings.FaceEndpoint;
-
-                var groups = await faceClient.PersonGroup.ListWithHttpMessagesAsync();
-                var group = groups.Body.FirstOrDefault(x => x.Name == settings.GroupName);
-
-                var perople = await faceClient.PersonGroupPerson.ListWithHttpMessagesAsync(group.PersonGroupId);
-
-                if (perople.Body.Count(x=>x.Name == person) == 0)
-                {
-                    await faceClient.PersonGroupPerson.CreateWithHttpMessagesAsync(group.PersonGroupId, person);
-                }
-                await BindFaces();
-                dropdownPerson.SelectedValue = person;
-            }
-            catch (Exception)
-            {
-
-            }
-        }
-
-        private async System.Threading.Tasks.Task DeletePerson(string person)
-        {
-            try
-            {
-
-                Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient faceClient = new Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient(
-                    new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ApiKeyServiceClientCredentials(settings.FaceKey),
-                    new System.Net.Http.DelegatingHandler[] { });
-
-                faceClient.Endpoint = settings.FaceEndpoint;
-
-                var groups = await faceClient.PersonGroup.ListWithHttpMessagesAsync();
-                var group = groups.Body.FirstOrDefault(x => x.Name == settings.GroupName);
-
-                var people = await faceClient.PersonGroupPerson.ListWithHttpMessagesAsync(group.PersonGroupId);
-
-                var personObject = people.Body.First(x => x.Name == person);
-                await faceClient.PersonGroupPerson.DeleteWithHttpMessagesAsync(group.PersonGroupId, personObject.PersonId);
-                await BindFaces();
-            }
-            catch (Exception)
-            {
-
-            }
-        }
-
-        private async System.Threading.Tasks.Task UpdatePerson(string person)
-        {
-            try
-            {
-
-                Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient faceClient = new Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient(
-                    new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ApiKeyServiceClientCredentials(settings.FaceKey),
-                    new System.Net.Http.DelegatingHandler[] { });
-
-                faceClient.Endpoint = settings.FaceEndpoint;
-
-                var groups = await faceClient.PersonGroup.ListWithHttpMessagesAsync();
-                var group = groups.Body.FirstOrDefault(x => x.Name == settings.GroupName);
-
-                var people = await faceClient.PersonGroupPerson.ListWithHttpMessagesAsync(group.PersonGroupId);
-                var personObject = people.Body.First(x => x.Name == person);
-
-                var trainingStatus = await faceClient.PersonGroup.GetTrainingStatusWithHttpMessagesAsync(group.PersonGroupId);
-                txtPersonFaceInfo.Text = $"{personObject.Name} has {personObject.PersistedFaceIds.Count()} faces : training status is {trainingStatus.Body.Status.ToString()}";
-            }
-            catch (Exception)
-            {
-
-            }
-        }
 
         public static string GetAppVersion()
         {
@@ -213,7 +100,6 @@ namespace MTCSTLKiosk
         private async void textVisionAPIKey_TextChanged(object sender, TextChangedEventArgs e)
         {
             settings.ComputerVisionKey = textVisionAPIKey.Text;
-            await BindFaces();
         }
 
         private void dropdownRegion_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -251,103 +137,8 @@ namespace MTCSTLKiosk
         }
 
 
-        private async void ButtonAddPerson_Click(object sender, RoutedEventArgs e)
-        {
-            await AddPerson(textNewPerson.Text);
-            textNewPerson.Text = "";
-        }
 
-        private async void DropdownPerson_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if(dropdownPerson.SelectedItem != null)
-                await UpdatePerson(dropdownPerson.SelectedItem.ToString());
-        }
 
-        private async void ButtonAddImages_Click(object sender, RoutedEventArgs e)
-        {
-            await UploadPics();
-        }
-
-        private async System.Threading.Tasks.Task UploadPics()
-        {
-            try
-            {
-                txtPersonFaceInfo.Text = "Uploading";
-                var picker = new Windows.Storage.Pickers.FileOpenPicker();
-                picker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
-                picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
-                picker.FileTypeFilter.Add(".jpg");
-                picker.FileTypeFilter.Add(".jpeg");
-                picker.FileTypeFilter.Add(".png");
-
-                var files = await picker.PickMultipleFilesAsync();
-                if (files != null)
-                {
-
-                    Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient faceClient = new Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient(
-                        new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ApiKeyServiceClientCredentials(settings.FaceKey),
-                        new System.Net.Http.DelegatingHandler[] { });
-
-                    faceClient.Endpoint = settings.FaceEndpoint;
-
-                    var groups = await faceClient.PersonGroup.ListWithHttpMessagesAsync();
-                    var group = groups.Body.FirstOrDefault(x => x.Name == settings.GroupName);
-
-                    var people = await faceClient.PersonGroupPerson.ListWithHttpMessagesAsync(group.PersonGroupId);
-                    var personObject = people.Body.First(x => x.Name == dropdownPerson.SelectedItem.ToString());
-
-                    foreach (var file in files)
-                    {
-                        var s = await file.OpenReadAsync();
-
-                        // Detect faces in the image and add to Anna
-                        await faceClient.PersonGroupPerson.AddFaceFromStreamWithHttpMessagesAsync(group.PersonGroupId, personObject.PersonId, s.AsStream());
-                    }
-                    await UpdatePerson(dropdownPerson.SelectedItem.ToString());
-                    
-                    await faceClient.PersonGroup.TrainWithHttpMessagesAsync(group.PersonGroupId);
-                }
-                else
-                {
-                    txtPersonFaceInfo.Text = "No Files";
-                }
-
-            }
-            catch (Exception ex)
-            {
-                txtPersonFaceInfo.Text = "Upload Error: " + ex.Message;
-            }
-        }
-        private async void ButtonDeleteUser_Click(object sender, RoutedEventArgs e)
-        {
-            var messageDialog = new MessageDialog("Are you sure you want to delete?", "DELETE");
-
-            // Add commands and set their callbacks; both buttons use the same callback function instead of inline event handlers
-            messageDialog.Commands.Add(new UICommand(
-                "Yes (Delete)",
-                new UICommandInvokedHandler(this.CommandInvokedHandler)));
-            messageDialog.Commands.Add(new UICommand(
-                "No",
-                new UICommandInvokedHandler(this.CommandInvokedHandler)));
-
-            // Set the command that will be invoked by default
-            messageDialog.DefaultCommandIndex = 0;
-
-            // Set the command to be invoked when escape is pressed
-            messageDialog.CancelCommandIndex = 1;
-
-            // Show the message dialog
-            await messageDialog.ShowAsync();
-
-        }
-
-        private async void CommandInvokedHandler(IUICommand command)
-        {
-            if(command.Label != "No")
-            {
-                await DeletePerson(dropdownPerson.SelectedItem.ToString());
-            }
-        }
 
         private void TextCustomVisionAPIKey_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -375,15 +166,6 @@ namespace MTCSTLKiosk
             settings.CustomVisionThreshold = (int)sliderCustomVision.Value;
         }
 
-        private void ToggleFaceDetect_Toggled(object sender, RoutedEventArgs e)
-        {
-            settings.DoFaceDetection = toggleFaceDetect.IsOn;
-        }
-
-        private void SliderFaceDetect_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
-        {
-            settings.FaceThreshold = (int)sliderFaceDetect.Value;
-        }
 
         private void TextFramesPerMinute_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -396,7 +178,6 @@ namespace MTCSTLKiosk
         private async void TextFaceEndPoint_TextChanged(object sender, TextChangedEventArgs e)
         {
             settings.FaceEndpoint = textFaceEndPoint.Text;
-            await BindFaces();
         }
 
         private void TextComputerVisionEndpoint_TextChanged(object sender, TextChangedEventArgs e)
