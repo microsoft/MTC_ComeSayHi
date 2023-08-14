@@ -532,30 +532,17 @@ namespace MTCSTLKiosk
                 config.SpeechRecognitionLanguage = "en-us";
 
                 Debug.WriteLine($"Starting");
-                MicrophoneCoordinates[] microphoneCoordinates = new MicrophoneCoordinates[7]
-                {
-                new MicrophoneCoordinates(0, 0, 0),
-                new MicrophoneCoordinates(40, 0, 0),
-                new MicrophoneCoordinates(20, -35, 0),
-                new MicrophoneCoordinates(-20, -35, 0),
-                new MicrophoneCoordinates(-40, 0, 0),
-                new MicrophoneCoordinates(-20, 35, 0),
-                new MicrophoneCoordinates(20, 35, 0)
-                };
-                var microphoneArrayGeometry = new MicrophoneArrayGeometry(MicrophoneArrayType.Planar, microphoneCoordinates);
-                var audioProcessingOptions = AudioProcessingOptions.Create(AudioProcessingConstants.AUDIO_INPUT_PROCESSING_ENABLE_DEFAULT, microphoneArrayGeometry);
-                var devices = await DeviceInformation.FindAllAsync(DeviceClass.AudioCapture);
-                var name = devices.FirstOrDefault(x => x.Name.Contains("Kinect")).Properties.GetValueOrDefault("System.Devices.DeviceInstanceId").ToString();
+              
+              //  var devices = await DeviceInformation.FindAllAsync(DeviceClass.AudioCapture);
+               // var name = devices.FirstOrDefault(x => x.Name.Contains("Kinect")).Properties.GetValueOrDefault("System.Devices.DeviceInstanceId").ToString();
 
-                using (var audioInput = AudioConfig.FromMicrophoneInput(name.Substring(13), audioProcessingOptions))
+                using (var audioInput = AudioConfig.FromDefaultMicrophoneInput())
                 {
                     var meetingID = Guid.NewGuid().ToString();
                     UpdateConversationFinalUI("Session started", "", meetingID);
 
-                    using (var conversation = await Conversation.CreateConversationAsync(config, meetingID))
-                    {
                         // create a conversation transcriber using audio stream input
-                        using (var conversationTranscriber = new ConversationTranscriber(audioInput))
+                        using (var conversationTranscriber = new ConversationTranscriber(config,audioInput))
                         {
                             conversationTranscriber.Transcribing += (s, e) =>
                             {
@@ -568,7 +555,7 @@ namespace MTCSTLKiosk
                                 try
                                 {
                                     //Debug.WriteLine($"Message received {e.Result.Text}");
-                                    UpdateConversationFinalUI(e.Result.Text, e.Result.UserId, meetingID);
+                                    UpdateConversationFinalUI(e.Result.Text, e.Result.SpeakerId, meetingID);
 
                                 }
                                 catch (Exception)
@@ -616,7 +603,6 @@ namespace MTCSTLKiosk
                             //await conversation.AddParticipantAsync(speaker2);
 
                             // Join to the conversation and start transcribing
-                            await conversationTranscriber.JoinConversationAsync(conversation);
                             await conversationTranscriber.StartTranscribingAsync().ConfigureAwait(false);
 
                             // waits for completion, then stop transcription
@@ -625,7 +611,7 @@ namespace MTCSTLKiosk
                             UpdateConversationFinalUI("Session ended", "", "");
                             await conversationTranscriber.StopTranscribingAsync().ConfigureAwait(false);
                         }
-                    }
+                    
                 }
             }
             catch (Exception ex)

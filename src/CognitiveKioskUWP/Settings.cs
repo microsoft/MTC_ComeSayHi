@@ -24,8 +24,8 @@ namespace MTCSTLKiosk
         public async Task<bool> HasKinect()
         {
             var devices = await DeviceInformation.FindAllAsync(DeviceClass.AudioCapture);
-
-            return devices.Any(x => x.Name.Contains("Kinect")) && DoConversations;
+            return true;
+            //return devices.Any(x => x.Name.Contains("Kinect")) && DoConversations;
         }
         public static Settings SingletonInstance
         {
