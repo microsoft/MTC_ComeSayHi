@@ -745,7 +745,7 @@ namespace MTCSTLKiosk
 
                 try
                 {
-                    if (!imageAnalysisRunning && DateTime.Now.Subtract(imageAnalysisLastDate).TotalMilliseconds > 1000)
+                    if (!imageAnalysisRunning && DateTime.Now.Subtract(imageAnalysisLastDate).TotalMilliseconds > 5000)
                     {
                         imageAnalysisRunning = true;
 
