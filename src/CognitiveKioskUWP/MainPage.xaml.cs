@@ -1,5 +1,4 @@
-﻿using Microsoft.AppCenter;
-using Microsoft.AppCenter.Analytics;
+﻿
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
 using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction;
@@ -151,9 +150,6 @@ namespace MTCSTLKiosk
             catch (Exception ex)
             {
                 // Eat this error
-                Analytics.TrackEvent(Microsoft.AppCenter.Crashes.Crashes.LogTag, new Dictionary<string, string> {
-                { "Extended", ex.ToString() }
-            });
             }
             finally
             {
@@ -289,7 +285,6 @@ namespace MTCSTLKiosk
 
                     if (!isFaceFound || DateTime.Now.Subtract(faceLastDate).TotalMinutes > 5)
                     {
-                        Analytics.TrackEvent("Faces found, starting capture");
                         isFaceFound = true;
                         await Dispatcher.RunAsync(CoreDispatcherPriority.Normal,  async () =>
                         {

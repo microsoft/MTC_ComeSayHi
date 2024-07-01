@@ -1,6 +1,4 @@
-﻿using Microsoft.AppCenter;
-using Microsoft.AppCenter.Analytics;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -39,10 +37,10 @@ namespace MTCSTLKiosk
 
         private void App_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
         {
-
-            Analytics.TrackEvent(Microsoft.AppCenter.Crashes.Crashes.LogTag + "System", new Dictionary<string, string> {
-                { "Extended", e.Exception.ToString() }
-            });
+            //Removed app center
+            //Analytics.TrackEvent(Microsoft.AppCenter.Crashes.Crashes.LogTag + "System", new Dictionary<string, string> {
+            //    { "Extended", e.Exception.ToString() }
+            //});
         }
 
         /// <summary>
@@ -52,8 +50,6 @@ namespace MTCSTLKiosk
         /// <param name = "e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
-            AppCenter.Start("0e22f2c3-bd36-4b7b-9904-f3a32811d822", typeof(Analytics), typeof(Microsoft.AppCenter.Crashes.Crashes));
-            Analytics.TrackEvent("Application entry point");
             
             Frame rootFrame = Window.Current.Content as Frame;
             // Do not repeat app initialization when the Window already has content,
