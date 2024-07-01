@@ -47,14 +47,6 @@
                     <TextBlock Text="Vision URL (https://***.api.cognitive.microsoft.com/sts/v1.0/issuetoken)" Margin="5" ></TextBlock>
                     <TextBox x:Name="textComputerVisionEndpoint" Text="" Margin="5" Width="400px"  HorizontalAlignment="Left" TextChanged="TextComputerVisionEndpoint_TextChanged" />
                 </StackPanel>
-                <StackPanel Margin="0,10,0,0">
-                    <TextBlock Text="Face API Key" Margin="5" ></TextBlock>
-                    <TextBox x:Name="textFaceAPIKey" Text="" Margin="5" Width="400px" TextChanged="textFaceAPIKey_TextChanged" HorizontalAlignment="Left" />
-                </StackPanel>
-                <StackPanel Margin="0,10,0,0">
-                    <TextBlock Text="Face URL (https://***.api.cognitive.microsoft.com/sts/v1.0/issuetoken)"   Margin="5"></TextBlock>
-                    <TextBox x:Name="textFaceEndPoint" Text="" Margin="5" Width="400px"  HorizontalAlignment="Left" TextChanged="TextFaceEndPoint_TextChanged" />
-                </StackPanel>
 
                 <TextBlock Text="Customer Vision (optional)" 
                     Style="{StaticResource TitleTextBlockStyle}"
@@ -98,14 +90,6 @@
                         </ComboBox>
                 </StackPanel>
 
-                <StackPanel Margin="0,10,0,0">
-                    <TextBlock Text="Use conversations (Requires specfic region and kinect)" Margin="5" ></TextBlock>
-                    <ToggleSwitch x:Name="toggleConversations"  Margin="5" Toggled="toggleConversations_Toggled"  />
-                </StackPanel>
-                <TextBlock Text="Familiar Faces (optional)" 
-                    Style="{StaticResource TitleTextBlockStyle}"
-                    Margin="0,40,0,0"
-                    FontWeight="Normal"/>
                 <Button x:Name="buttonClose" Content="Save &amp;  Close" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="20,20,20,20" Click="buttonClose_Click"/>
             </StackPanel>
         </ScrollViewer>

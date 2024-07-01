@@ -21,12 +21,6 @@ namespace MTCSTLKiosk
         }
 
 
-        public async Task<bool> HasKinect()
-        {
-            var devices = await DeviceInformation.FindAllAsync(DeviceClass.AudioCapture);
-            return true;
-            //return devices.Any(x => x.Name.Contains("Kinect")) && DoConversations;
-        }
         public static Settings SingletonInstance
         {
             get
@@ -63,19 +57,6 @@ namespace MTCSTLKiosk
                     return false;
             }
             set { localSettings.Values["DoConversations"] = value; }
-        }
-
-
-        public bool DoFaceDetection
-        {
-            get
-            {
-                if (localSettings.Values.ContainsKey("DoFaceDetection"))
-                    return (bool)localSettings.Values["DoFaceDetection"];
-                else
-                    return false;
-            }
-            set { localSettings.Values["DoFaceDetection"] = value; }
         }
 
         public string SpeechKey
@@ -157,71 +138,6 @@ namespace MTCSTLKiosk
             set { localSettings.Values["CustomVisionThreshold"] = value; }
         }
 
-        public int FaceThreshold
-        {
-            get
-            {
-                if (localSettings.Values.ContainsKey("FaceThreshold"))
-                    return (int)localSettings.Values["FaceThreshold"];
-                else
-                    return 65;
-            }
-            set { localSettings.Values["FaceThreshold"] = value; }
-        }
-
-        public int FaceCVFPM
-        {
-            get
-            {
-                if (localSettings.Values.ContainsKey("FaceCVFPM"))
-                    return (int)localSettings.Values["FaceCVFPM"];
-                else
-                    return 60;
-            }
-            set { localSettings.Values["FaceCVFPM"] = value; }
-        }
-
-        public string FaceKey
-        {
-            get
-            {
-                if (localSettings.Values.ContainsKey("FaceKey"))
-                    return (string)localSettings.Values["FaceKey"];
-                else
-                    return string.Empty;
-            }
-            set { localSettings.Values["FaceKey"] = value; }
-        }
-
-        private string FaceRegion
-        {
-            get
-            {
-                if (localSettings.Values.ContainsKey("FaceRegion"))
-                    return (string)localSettings.Values["FaceRegion"];
-                else
-                    return string.Empty;
-            }
-            set { localSettings.Values["FaceRegion"] = value; }
-        }
-
-
-        public string FaceEndpoint
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(FaceRegion) && FaceRegion.Length < 20)
-                {
-                    localSettings.Values["FaceEndpoint"] = $"https://{FaceRegion}.api.cognitive.microsoft.com";
-                    FaceRegion = "";
-                }
-                if (localSettings.Values.ContainsKey("FaceEndpoint"))
-                    return (string)localSettings.Values["FaceEndpoint"];
-                else
-                    return string.Empty;
-            }
-            set { localSettings.Values["FaceEndpoint"] = value; }
-        }
 
         private string ComputerVisionRegion
         {
@@ -235,6 +151,17 @@ namespace MTCSTLKiosk
             set { localSettings.Values["VisionRegion"] = value; }
         }
 
+        public int FaceCVFPM
+        {
+            get
+            {
+                if (localSettings.Values.ContainsKey("FaceCVFPM"))
+                    return (int)localSettings.Values["FaceCVFPM"];
+                else
+                    return 60;
+            }
+            set { localSettings.Values["FaceCVFPM"] = value; }
+        }
 
 
         public string ComputerVisionEndpoint

@@ -120,9 +120,6 @@
     <Compile Include="Controls\Conversation.xaml.cs">
       <DependentUpon>Conversation.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Faces.xaml.cs">
-      <DependentUpon>Faces.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\IQuarterControl.cs" />
     <Compile Include="Controls\ObjectBox.xaml.cs">
       <DependentUpon>ObjectBox.xaml</DependentUpon>
@@ -172,10 +169,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\Conversation.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Faces.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

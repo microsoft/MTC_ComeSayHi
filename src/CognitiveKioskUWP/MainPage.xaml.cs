@@ -267,10 +267,7 @@ namespace MTCSTLKiosk
                 captionsControl.MainCapture.Source = mediaCapture;
                 speechControl.MainCapture.Source = mediaCapture2;
                 tagsControl.MainCapture.Source = mediaCapture3;
-                if (await settings.HasKinect())
-                    conversationControl.MainCapture.Source = mediaCapture4;
-                else
-                    facesControl.MainCapture.Source = mediaCapture4;
+                conversationControl.MainCapture.Source = mediaCapture4;
                 await mediaCapture.StartPreviewAsync();
                 await mediaCapture2.StartPreviewAsync();
                 await mediaCapture3.StartPreviewAsync();
@@ -317,14 +314,7 @@ namespace MTCSTLKiosk
         private async Task ActivateUI()
         {
             tagsControl.Visibility = Visibility.Visible;
-            if (await settings.HasKinect())
-            {
-                conversationControl.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                facesControl.Visibility = Visibility.Visible;
-            }
+            conversationControl.Visibility = Visibility.Visible;
             captionsControl.Visibility = Visibility.Visible;
             speechControl.Visibility = Visibility.Visible;
             timerTakePicture.Start();
@@ -333,10 +323,8 @@ namespace MTCSTLKiosk
             {
                 _ = Task.Factory.StartNew(StartSpeechTranslation);
 
-                if (await settings.HasKinect())
-                {
-                    _ = Task.Factory.StartNew(StartSpeechConversation);
-                }
+             
+                _ = Task.Factory.StartNew(StartSpeechConversation);
 
             }
             catch (Exception)
@@ -348,7 +336,6 @@ namespace MTCSTLKiosk
         private void DisableUI()
         {
             tagsControl.Visibility = Visibility.Collapsed;
-            facesControl.Visibility = Visibility.Collapsed;
             captionsControl.Visibility = Visibility.Collapsed;
             conversationControl.Visibility = Visibility.Collapsed;
             speechControl.Visibility = Visibility.Collapsed;
@@ -721,20 +708,16 @@ namespace MTCSTLKiosk
                 }
 
 
-                Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient faceClient = new Microsoft.Azure.CognitiveServices.Vision.Face.FaceClient(
-                    new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ApiKeyServiceClientCredentials(settings.FaceKey),
-                    new System.Net.Http.DelegatingHandler[] { });
                 
 
 
                 visionClient.Endpoint = settings.ComputerVisionEndpoint;
-                faceClient.Endpoint = settings.FaceEndpoint;
 
                 List<Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models.VisualFeatureTypes?> features =
                         new List<VisualFeatureTypes?>()
                     {
-                    VisualFeatureTypes.Categories, VisualFeatureTypes.Description,
-                    VisualFeatureTypes.Tags, VisualFeatureTypes.Faces, VisualFeatureTypes.Brands
+                    VisualFeatureTypes.Description,
+                    VisualFeatureTypes.Tags, VisualFeatureTypes.Brands
                     };
                 // The list of Face attributes to return.
                 IList<FaceAttributeType> faceAttributes =
@@ -775,12 +758,6 @@ namespace MTCSTLKiosk
 
 
 
-                    var analysisFace = await faceClient.Face.DetectWithStreamWithHttpMessagesAsync(await imageStreamCallback(), returnFaceId: false, returnFaceAttributes: faceAttributes);
-                    imageWidth = image.PixelWidth;
-                    imageHeight = image.PixelHeight;
-                    facesControl.UpdateEvent(new CognitiveEvent() { Faces = analysisFace.Body, ImageWidth = image.PixelWidth, ImageHeight = image.PixelHeight });
-
-                     
 
                 }
                 catch (Exception)

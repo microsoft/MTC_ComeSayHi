@@ -45,13 +45,11 @@ namespace MTCSTLKiosk
             dropdownRegion.ItemsSource = settings.Regions.ToArray();
             dropdownCustomVisionRegion.ItemsSource = settings.Regions.ToArray();
 
-            textFaceAPIKey.Text = settings.FaceKey;
             textVisionAPIKey.Text = settings.ComputerVisionKey;
             textSpeechAPIKey.Text = settings.SpeechKey;
             textCustomVisionAPIKey.Text = settings.CustomVisionKey;
             textFramesPerMinute.Text = settings.FaceCVFPM.ToString();
             textComputerVisionEndpoint.Text = settings.ComputerVisionEndpoint;
-            textFaceEndPoint.Text = settings.FaceEndpoint;
 
             textCustomVisionProjectID.Text = settings.CustomVisionProjectId;
             textCustomVisionIterationName.Text = settings.CustomVisionIterationName;
@@ -61,7 +59,6 @@ namespace MTCSTLKiosk
             dropdownRegion.SelectedValue = settings.SpeechRegion;
             dropdownCustomVisionRegion.SelectedValue = settings.CustomVisionRegion;
 
-            toggleConversations.IsOn = settings.DoFaceDetection;
 
 
             var devices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
@@ -107,11 +104,6 @@ namespace MTCSTLKiosk
             settings.SpeechRegion = (string)dropdownRegion.SelectedValue;
         }
 
-
-        private void textFaceAPIKey_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            settings.FaceKey = textFaceAPIKey.Text;
-        }
 
         private void dropdownCamera_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -175,19 +167,11 @@ namespace MTCSTLKiosk
 
         }
 
-        private async void TextFaceEndPoint_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            settings.FaceEndpoint = textFaceEndPoint.Text;
-        }
 
         private void TextComputerVisionEndpoint_TextChanged(object sender, TextChangedEventArgs e)
         {
             settings.ComputerVisionEndpoint = textComputerVisionEndpoint.Text;
         }
 
-        private void toggleConversations_Toggled(object sender, RoutedEventArgs e)
-        {
-            settings.DoConversations = toggleConversations.IsOn;
-        }
     }
 }
