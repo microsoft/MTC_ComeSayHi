@@ -1,5 +1,4 @@
-﻿using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,7 +20,6 @@ namespace MTCSTLKiosk.Controls
 {
     public sealed partial class Tags : UserControl, IQuarterControl
     {
-        List<Person> people = new List<Person>();
         DateTime lastRefresh = DateTime.Now.AddDays(-1);
         private Settings settings = Settings.SingletonInstance;
 
@@ -37,7 +35,6 @@ namespace MTCSTLKiosk.Controls
             if (lastRefresh < DateTime.Now.AddMinutes(-1))
             {
                 lastRefresh = DateTime.Now;
-                people.Clear();
                 borderTop.Visibility = Visibility.Collapsed;
             }
             try
@@ -58,16 +55,6 @@ namespace MTCSTLKiosk.Controls
             {
 
                 textTags.Text += "\n Image analysis failed";
-            }
-            if (mainEvent.IdentifiedPerson != null)
-            {
-                borderTop.Visibility = Visibility.Visible;
-
-                if (people.Count(x=>x.Name == mainEvent.IdentifiedPerson.Name) == 0)
-                {
-                    people.Add(mainEvent.IdentifiedPerson);
-                }
-                textPeople.Text = "Welcome back " + string.Join(" and ",people.Select(x => x.Name).ToArray());
             }
         }
     }

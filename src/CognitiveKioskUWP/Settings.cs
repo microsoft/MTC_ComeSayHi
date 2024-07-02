@@ -90,54 +90,6 @@ namespace MTCSTLKiosk
             set { localSettings.Values["VisionKey"] = value; }
         }
 
-        public string CustomVisionKey
-        {
-            get
-            {
-                if (localSettings.Values.ContainsKey("CustomVisionKey"))
-                    return (string)localSettings.Values["CustomVisionKey"];
-                else
-                    return string.Empty;
-            }
-            set { localSettings.Values["CustomVisionKey"] = value; }
-        }
-
-        public string CustomVisionProjectId
-        {
-            get
-            {
-                if (localSettings.Values.ContainsKey("CustomVisionProjectId"))
-                    return (string)localSettings.Values["CustomVisionProjectId"];
-                else
-                    return string.Empty;
-            }
-            set { localSettings.Values["CustomVisionProjectId"] = value; }
-        }
-
-        public string CustomVisionIterationName
-        {
-            get
-            {
-                if (localSettings.Values.ContainsKey("CustomVisionIterationName"))
-                    return (string)localSettings.Values["CustomVisionIterationName"];
-                else
-                    return string.Empty;
-            }
-            set { localSettings.Values["CustomVisionIterationName"] = value; }
-        }
-
-        public int CustomVisionThreshold
-        {
-            get
-            {
-                if (localSettings.Values.ContainsKey("CustomVisionThreshold"))
-                    return (int)localSettings.Values["CustomVisionThreshold"];
-                else
-                    return 80;
-            }
-            set { localSettings.Values["CustomVisionThreshold"] = value; }
-        }
-
 
         private string ComputerVisionRegion
         {
@@ -181,18 +133,6 @@ namespace MTCSTLKiosk
             set { localSettings.Values["ComputerVisionEndpoint"] = value; }
         }
 
-
-        public string CustomVisionRegion
-        {
-            get
-            {
-                if (localSettings.Values.ContainsKey("CustomVisionRegion"))
-                    return (string)localSettings.Values["CustomVisionRegion"];
-                else
-                    return string.Empty;
-            }
-            set { localSettings.Values["CustomVisionRegion"] = value; }
-        }
 
         public string SpeechRegion
         {

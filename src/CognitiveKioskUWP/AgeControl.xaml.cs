@@ -1,5 +1,4 @@
-﻿using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;

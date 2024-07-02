@@ -1,9 +1,6 @@
 ﻿
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
-using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction;
-using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction.Models;
-using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Transcription;
@@ -690,20 +687,7 @@ namespace MTCSTLKiosk
                 Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ComputerVisionClient visionClient = new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ComputerVisionClient(
                     new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ApiKeyServiceClientCredentials(settings.ComputerVisionKey),
                     new System.Net.Http.DelegatingHandler[] { });
-
-                // Create a prediction endpoint, passing in the obtained prediction key
-                CustomVisionPredictionClient customVisionClient = null;
-
-                if (!string.IsNullOrEmpty(settings.CustomVisionKey))
-                {
-                    customVisionClient = new CustomVisionPredictionClient(new Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction.ApiKeyServiceClientCredentials(settings.CustomVisionKey), new System.Net.Http.DelegatingHandler[] { })
-                    {
-                        Endpoint = $"https://{settings.CustomVisionRegion}.api.cognitive.microsoft.com"
-                    };
-                }
-
-
-                
+              
 
 
                 visionClient.Endpoint = settings.ComputerVisionEndpoint;
@@ -714,12 +698,7 @@ namespace MTCSTLKiosk
                     VisualFeatureTypes.Description,
                     VisualFeatureTypes.Tags, VisualFeatureTypes.Brands
                     };
-                // The list of Face attributes to return.
-                IList<FaceAttributeType> faceAttributes =
-                    new FaceAttributeType[]
-                    {
-            FaceAttributeType.HeadPose
-                    };
+    
 
                 try
                 {
@@ -730,21 +709,9 @@ namespace MTCSTLKiosk
                         _ = Task.Run(async () =>
                         {
                             ImageAnalysis analysis = await visionClient.AnalyzeImageInStreamAsync(await imageStreamCallback(), features);
-                            ImagePrediction analysisCV = null;
+                     
 
-                            try
-                            {
-                                if(customVisionClient != null)
-                                    analysisCV = await customVisionClient.DetectImageWithNoStoreAsync(new Guid(settings.CustomVisionProjectId), settings.CustomVisionIterationName, await imageStreamCallback());
-
-                            }
-                            catch (Exception)
-                            {
-                                // Throw away error
-                            }
-
-
-                            UpdateWithAnalysis(analysis, analysisCV);
+                            UpdateWithAnalysis(analysis);
 
                             imageAnalysisLastDate = DateTime.Now;
                             imageAnalysisRunning = false;
@@ -767,18 +734,18 @@ namespace MTCSTLKiosk
             }
         }
 
-        private void UpdateWithAnalysis(ImageAnalysis analysis, ImagePrediction analysisCV)
+        private void UpdateWithAnalysis(ImageAnalysis analysis)
         {
             try
            {
                 if (Dispatcher.HasThreadAccess)
                 {
-                    captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageAnalysisCV = analysisCV, ImageHeight = imageHeight, ImageWidth = imageWidth });
-                    tagsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageAnalysisCV = analysisCV });
+                    captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageHeight = imageHeight, ImageWidth = imageWidth });
+                    tagsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis });
                 }
                 else
                 {
-                    var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageAnalysisCV = analysisCV, ImageHeight = imageHeight, ImageWidth = imageWidth }); tagsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageAnalysisCV = analysisCV }); });
+                    var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageHeight = imageHeight, ImageWidth = imageWidth }); tagsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis}); });
                 }
             }
             catch (Exception)

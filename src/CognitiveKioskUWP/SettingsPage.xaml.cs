@@ -1,5 +1,4 @@
 ﻿using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
-using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -43,21 +42,15 @@ namespace MTCSTLKiosk
         protected async override void OnNavigatedTo(NavigationEventArgs e)
         {
             dropdownRegion.ItemsSource = settings.Regions.ToArray();
-            dropdownCustomVisionRegion.ItemsSource = settings.Regions.ToArray();
 
             textVisionAPIKey.Text = settings.ComputerVisionKey;
             textSpeechAPIKey.Text = settings.SpeechKey;
-            textCustomVisionAPIKey.Text = settings.CustomVisionKey;
             textFramesPerMinute.Text = settings.FaceCVFPM.ToString();
             textComputerVisionEndpoint.Text = settings.ComputerVisionEndpoint;
 
-            textCustomVisionProjectID.Text = settings.CustomVisionProjectId;
-            textCustomVisionIterationName.Text = settings.CustomVisionIterationName;
-            sliderCustomVision.Value = settings.CustomVisionThreshold;
 
 
             dropdownRegion.SelectedValue = settings.SpeechRegion;
-            dropdownCustomVisionRegion.SelectedValue = settings.CustomVisionRegion;
 
 
 
@@ -128,35 +121,6 @@ namespace MTCSTLKiosk
             await Launcher.LaunchUriAsync(mailtoUri);
         }
 
-
-
-
-
-        private void TextCustomVisionAPIKey_TextChanged(object sender, TextChangedEventArgs e)
-        {
-          settings.CustomVisionKey =  textCustomVisionAPIKey.Text;
-        }
-
-        private void DropdownCustomVisionRegion_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            settings.CustomVisionRegion = (string)dropdownCustomVisionRegion.SelectedValue;
-
-        }
-
-        private void TextCustomVisionProjectID_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            settings.CustomVisionProjectId = textCustomVisionProjectID.Text;
-        }
-
-        private void TextCustomVisionIterationName_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            settings.CustomVisionIterationName = textCustomVisionIterationName.Text;
-        }
-
-        private void Slider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
-        {
-            settings.CustomVisionThreshold = (int)sliderCustomVision.Value;
-        }
 
 
         private void TextFramesPerMinute_TextChanged(object sender, TextChangedEventArgs e)
