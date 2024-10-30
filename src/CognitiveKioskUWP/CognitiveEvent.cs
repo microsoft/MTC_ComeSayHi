@@ -15,6 +15,8 @@ namespace MTCSTLKiosk
         public string PrimarySpeechMessage { get; set; }
         public string SecondarySpeechMessage { get; set; }
 
+        public string OpenAIPromptResponse { get; set; }
+
         public string PrimarySpeechMessageFinal { get; set; }
         public string SecondarySpeechMessageFinal { get; set; }
 

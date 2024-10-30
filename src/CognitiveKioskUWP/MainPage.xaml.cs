@@ -1,10 +1,13 @@
 ﻿
+using Azure.AI.OpenAI;
+using Azure;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Transcription;
 using Microsoft.CognitiveServices.Speech.Translation;
+using OpenAI.Chat;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -33,6 +36,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
+using System.ClientModel;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -666,7 +670,7 @@ namespace MTCSTLKiosk
             try
             {
                 Func<Task<Stream>> imageStreamCallback;
-
+                byte[] bytes;
                 using (InMemoryRandomAccessStream stream = new InMemoryRandomAccessStream())
                 {
                     BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, stream);
@@ -676,7 +680,7 @@ namespace MTCSTLKiosk
                     // Read the pixel bytes from the memory stream
                     using (var reader = new DataReader(stream.GetInputStreamAt(0)))
                     {
-                        var bytes = new byte[stream.Size];
+                        bytes = new byte[stream.Size];
                         await reader.LoadAsync((uint)stream.Size);
                         reader.ReadBytes(bytes);
                         imageStreamCallback = () => Task.FromResult<Stream>(new MemoryStream(bytes));
@@ -702,16 +706,23 @@ namespace MTCSTLKiosk
 
                 try
                 {
-                    if (!imageAnalysisRunning && DateTime.Now.Subtract(imageAnalysisLastDate).TotalMilliseconds > 5000)
+                    if (!imageAnalysisRunning && DateTime.Now.Subtract(imageAnalysisLastDate).TotalMilliseconds > 10000)
                     {
                         imageAnalysisRunning = true;
 
                         _ = Task.Run(async () =>
                         {
                             ImageAnalysis analysis = await visionClient.AnalyzeImageInStreamAsync(await imageStreamCallback(), features);
-                     
-
-                            UpdateWithAnalysis(analysis);
+                            if(!string.IsNullOrEmpty(settings.OpenAIUrl))
+                            {
+                                string prompt = settings.OpenAIImagePrompt;
+                                string OpenAIPromptResponse = GPTPromptWithImage(prompt, new BinaryData(bytes));
+                                UpdateWithAnalysis(analysis, OpenAIPromptResponse);
+                            }
+                            else
+                            {
+                                UpdateWithAnalysis(analysis, "");
+                            }
 
                             imageAnalysisLastDate = DateTime.Now;
                             imageAnalysisRunning = false;
@@ -734,18 +745,55 @@ namespace MTCSTLKiosk
             }
         }
 
-        private void UpdateWithAnalysis(ImageAnalysis analysis)
+        private string GPTPromptWithImage(string prompt, BinaryData imgdata)
+        {
+
+            try
+            {
+                AzureOpenAIClient azureClient = new AzureOpenAIClient(
+                    new Uri(settings.OpenAIUrl),
+                    new ApiKeyCredential(settings.OpenAIKey));
+                ChatClient chatClient = azureClient.GetChatClient(settings.OpenAIModel);
+
+                ChatMessage[] messages = new ChatMessage[]
+                {
+                    // System messages represent instructions or other guidance about how the assistant should behave
+                    new SystemChatMessage(prompt),
+                    // User messages represent user input, whether historical or the most recent input
+                    new UserChatMessage(
+                        ChatMessageContentPart.CreateTextPart(prompt),
+                        ChatMessageContentPart.CreateImagePart(imgdata, "image/png"))
+                };
+                ChatCompletion completion = chatClient.CompleteChat(messages);
+
+                Console.WriteLine($"{completion.Role}: {completion.Content[0].Text}");
+
+                return completion.Content[0].Text;
+
+            }
+            catch (Exception ex)
+            {
+                return "error: " + ex.Message;
+            }
+
+        }
+
+
+        private void UpdateWithAnalysis(ImageAnalysis analysis, string OpenAIPromptResponse)
         {
             try
            {
                 if (Dispatcher.HasThreadAccess)
                 {
-                    captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageHeight = imageHeight, ImageWidth = imageWidth });
+                    captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageHeight = imageHeight, ImageWidth = imageWidth, OpenAIPromptResponse = OpenAIPromptResponse });
                     tagsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis });
                 }
                 else
                 {
-                    var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageHeight = imageHeight, ImageWidth = imageWidth }); tagsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis}); });
+                    var task = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => 
+                    {captionsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis, ImageHeight = imageHeight, ImageWidth = imageWidth, OpenAIPromptResponse = OpenAIPromptResponse }); 
+                        tagsControl.UpdateEvent(new CognitiveEvent() { ImageAnalysis = analysis}); 
+                    });
                 }
             }
             catch (Exception)

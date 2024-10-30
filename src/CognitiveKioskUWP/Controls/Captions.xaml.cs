@@ -35,9 +35,16 @@ namespace MTCSTLKiosk.Controls
 
         public void UpdateEvent(CognitiveEvent mainEvent)
         {
-            if (mainEvent.ImageAnalysis.Description.Captions.Count > 0)
+            if(!string.IsNullOrEmpty(mainEvent.OpenAIPromptResponse))
             {
-                textDescription.Text = mainEvent.ImageAnalysis.Description.Captions.FirstOrDefault().Text;
+                textDescription.Text = mainEvent.OpenAIPromptResponse;
+            }
+            else if (mainEvent.ImageAnalysis != null)
+            {
+                if (mainEvent.ImageAnalysis.Description.Captions.Count > 0)
+                {
+                    textDescription.Text = mainEvent.ImageAnalysis.Description.Captions.FirstOrDefault().Text;
+                }
             }
 
         }

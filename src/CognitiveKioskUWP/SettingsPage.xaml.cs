@@ -47,6 +47,11 @@ namespace MTCSTLKiosk
             textSpeechAPIKey.Text = settings.SpeechKey;
             textFramesPerMinute.Text = settings.FaceCVFPM.ToString();
             textComputerVisionEndpoint.Text = settings.ComputerVisionEndpoint;
+            textOpenAIKey.Text = settings.OpenAIKey;
+            textOpenAIModel.Text = settings.OpenAIModel;
+            textOpenAIUrl.Text = settings.OpenAIUrl;
+            textOpenAIPrompt.Text = settings.OpenAIImagePrompt;
+
 
 
 
@@ -137,5 +142,24 @@ namespace MTCSTLKiosk
             settings.ComputerVisionEndpoint = textComputerVisionEndpoint.Text;
         }
 
+        private void textOpenAIUrl_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            settings.OpenAIUrl = textOpenAIUrl.Text;
+        }
+
+        private void textOpenAIKey_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            settings.OpenAIKey = textOpenAIKey.Text;
+        }
+
+        private void textOpenAIModel_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            settings.OpenAIModel = textOpenAIModel.Text;
+        }
+
+        private void textOpenAIPrompt_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            settings.OpenAIImagePrompt = textOpenAIPrompt.Text;
+        }
     }
 }

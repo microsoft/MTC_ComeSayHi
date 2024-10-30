@@ -17,7 +17,7 @@
         <local:ObjectBox Width="500" Height="300" x:Name="box3" Visibility="Collapsed" VerticalAlignment="Top" HorizontalAlignment="Left"  />
         <local:ObjectBox Width="500" Height="300" x:Name="box4" Visibility="Collapsed" VerticalAlignment="Top" HorizontalAlignment="Left"  />
         <Border VerticalAlignment="Bottom" Background="#82F25022" Margin="20">
-            <TextBlock x:Name="textDescription" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="30" TextAlignment="Center" Foreground="White"/>
+            <TextBlock x:Name="textDescription" HorizontalAlignment="Stretch" Text="" TextWrapping="Wrap" FontSize="25" TextAlignment="Left" Foreground="White"/>
         </Border>
     </Grid>
 </UserControl>
